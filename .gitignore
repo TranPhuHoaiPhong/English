@@ -1,0 +1,35 @@
+# ========================
+# Node.js backend
+# ========================
+/backend/node_modules
+/backend/dist
+/backend/.env
+/backend/npm-debug.log*
+/backend/yarn-debug.log*
+/backend/yarn-error.log*
+
+# ========================
+# React frontend (Vite)
+# ========================
+/frontend/node_modules
+/frontend/dist
+/frontend/.env
+/frontend/.vite
+
+# ========================
+# Mac / VSCode / JetBrains
+# ========================
+.DS_Store
+*.log
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.vscode/
+.idea/
+
+# ========================
+# Others
+# ========================
+*.bak
+*.tmp
