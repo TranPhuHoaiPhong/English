@@ -1,9 +1,14 @@
+import HeaderComponent from "../../components/HeaderComponent/HeaderComponent";
+
 function HomePage() {
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Welcome to HomePage</h1>
-      <p>This is your main page.</p>
-    </div>
+    <>
+      <HeaderComponent />
+      <div style={{ padding: 20 }}>
+        <h1>Welcome to HomePage</h1>
+        <p>This is your main page.</p>
+      </div>
+    </>
   );
 }
 

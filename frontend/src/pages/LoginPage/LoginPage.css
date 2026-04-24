@@ -1,0 +1,123 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.login-container {
+  background-color: #8d5b63;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: 80%;
+  height: 85vh;
+  background: #eee;
+  border-radius: 20px;
+  display: flex;
+  overflow: hidden;
+}
+
+/* LEFT IMAGE */
+.login-left {
+  flex: 1;
+  background-image: url("https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+/* RIGHT SIDE */
+.login-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-content {
+  width: 70%;
+  text-align: center;
+}
+
+.logo {
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #222;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background: #000;
+}
+
+.forgot {
+  font-size: 13px;
+  color: #777;
+}
+
+.register {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.register span {
+  color: #3b5998;
+  cursor: pointer;
+}
+
+.policy {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #888;
+}
+
+@media (max-width: 992px) {
+  .login-card {
+    flex-direction: column; /* xếp dọc */
+    height: auto;
+  }
+
+  .login-left {
+    height: 200px; /* hoặc 150px tuỳ bạn */
+  }
+
+  .login-right {
+    flex: none; /* 👈 bỏ flex */
+    width: 100%;
+  }
+
+  .login-content {
+    width: 90%;
+    padding: 20px 0;
+  }
+}
