@@ -1,9 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
-import { useLogin } from "../../services/Login/useLogin";
+import { useLogin } from "../../../services/Member/Login/useLogin";
+import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 function LoginPage() {
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     email,
@@ -42,15 +46,33 @@ function LoginPage() {
             />
             
 
-            <input
-              type="password"
-              placeholder="Password"
-              className="input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingRight: 40 }}
+              />
 
-            {error && <p className="error">{error}</p>}
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: "35%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  color: "#888",
+                  fontSize: "large"
+                }}
+              >
+                {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              </span>
+            </div>
+
+            <p className="error">{error}</p>
             <button className="login-btn" onClick={onSubmit}>LOGIN</button>
 
             <p className="register">
