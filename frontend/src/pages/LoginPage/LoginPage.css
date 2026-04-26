@@ -8,11 +8,41 @@ body {
 }
 
 .login-container {
-  background-color: #8d5b63;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  background: linear-gradient(
+    270deg,
+    #e2a247,
+    #e8b36a,
+    #f2c98a,
+    #e8b36a,
+    #d18c3f,
+    #e2a247
+  );
+
+  background-size: 400% 400%;
+  animation: gradientMove 14s ease-in-out infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .login-card {
@@ -24,15 +54,13 @@ body {
   overflow: hidden;
 }
 
-/* LEFT IMAGE */
 .login-left {
   flex: 1;
-  background-image: url("https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp");
+  background-image: url("https://sunluxe.com.sg/Content/Upload/Images/1763343500000.jpeg");
   background-size: cover;
   background-position: center;
 }
 
-/* RIGHT SIDE */
 .login-right {
   flex: 1;
   display: flex;
@@ -61,6 +89,11 @@ body {
   border: none;
   border-bottom: 1px solid #ccc;
   outline: none;
+  font-size: 14px;
+}
+
+.error {
+  color: red;
   font-size: 14px;
 }
 
@@ -103,16 +136,16 @@ body {
 
 @media (max-width: 992px) {
   .login-card {
-    flex-direction: column; /* xếp dọc */
+    flex-direction: column; 
     height: auto;
   }
 
   .login-left {
-    height: 200px; /* hoặc 150px tuỳ bạn */
+    height: 200px;
   }
 
   .login-right {
-    flex: none; /* 👈 bỏ flex */
+    flex: none;
     width: 100%;
   }
 
