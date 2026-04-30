@@ -19,6 +19,7 @@ import { useState } from "react";
 import { leaveBalance, requests } from "../../../services/Member/HomePage/dashboardData";
 import { requestColumns } from "./tableColumns";
 import LeaveRequestModal from "./LeaveRequestModel";
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -31,6 +32,8 @@ function HomePage() {
   const total = leaveBalance.reduce((sum, item) => sum + item.total, 0);
 
   const [open, setOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <>
@@ -158,6 +161,14 @@ function HomePage() {
             columns={requestColumns}
             dataSource={filteredRequests}
             pagination={false}
+            onRow={(record) => ({
+              onClick: () => {
+                console.log("Row data:", record);
+
+                // 👉 chuyển trang + truyền data
+                // navigate("/notification", { state: record });
+              }
+            })}
           />
         </Card>
 

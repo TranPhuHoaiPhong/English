@@ -19,9 +19,13 @@ function LoginPage() {
   } = useLogin();
 
   const onSubmit = () => {
-    const isValid = handleLogin();
-    if (isValid) {
+    const role = handleLogin();
+    
+    if (role === "member") {
       navigate("/home");
+    }
+    else if (role === "admin") {
+      navigate("/dashboard/admin");
     }
   }
 

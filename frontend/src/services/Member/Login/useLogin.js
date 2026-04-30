@@ -13,13 +13,16 @@ export function useLogin() {
 
         if (email === "member@gmail.com" && password === "1") {
             setError("");
-            return true;
+            return "member";
+        } else if (email === "admin@gmail.com" && password === "11") {
+            setError("");
+            return "admin";
         } else {
             setError("Invalid email or password.");
             return false;
         }
     }
-
+ 
     return {
         email,
         password,

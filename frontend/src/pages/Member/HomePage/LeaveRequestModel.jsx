@@ -18,6 +18,7 @@ function LeaveRequestModal({ open, setOpen }) {
 
   // 👇 theo dõi leave_type
   const leaveType = Form.useWatch("leave_type", form);
+  const reasonType = Form.useWatch("reason_type", form);
 
   const handleSubmit = (values) => {
     console.log("Form values:", values);
@@ -45,6 +46,8 @@ function LeaveRequestModal({ open, setOpen }) {
           <Select placeholder="Select type">
             <Select.Option value="annual">Annual</Select.Option>
             <Select.Option value="sick">Sick</Select.Option>
+            <Select.Option value="unpaid">Unpaid</Select.Option>
+            <Select.Option value="other">Other</Select.Option>
           </Select>
         </Form.Item>
 
@@ -57,54 +60,58 @@ function LeaveRequestModal({ open, setOpen }) {
           <RangePicker style={{ width: "100%" }} />
         </Form.Item>
 
-        {/* Session */}
-        <Form.Item label="Session" name="leave_session">
-          <Select defaultValue="full_day">
-            <Select.Option value="full_day">Full Day</Select.Option>
-            <Select.Option value="morning">Morning</Select.Option>
-            <Select.Option value="afternoon">Afternoon</Select.Option>
+        {/* Reason */}
+        <Form.Item
+          label="Reason"
+          name="reason_type"
+          rules={[{ required: true, message: "Please select a reason" }]}
+        >
+          <Select placeholder="Select reason">
+            <Select.Option value="family">Việc gia đình gấp</Select.Option>
+            <Select.Option value="admin">Công việc hành chính</Select.Option>
+            <Select.Option value="study">Thi cử / học tập</Select.Option>
+            <Select.Option value="event">Hiếu hỉ</Select.Option>
+            <Select.Option value="other">Lý do cá nhân khác</Select.Option>
           </Select>
         </Form.Item>
 
-        {/* Reason */}
-        <Form.Item label="Reason" name="reason">
-          <Input.TextArea rows={3} />
-        </Form.Item>
+        {/* 👇 chỉ hiện khi chọn "other" */}
+        {reasonType === "other" && (
+          <Form.Item
+            label="Other reason"
+            name="reason"
+            rules={[
+              { required: true, message: "Please enter your reason" },
+              { max: 200, message: "Max 200 characters" }
+            ]}
+          >
+            <Input.TextArea
+              rows={3}
+              placeholder="Nhập lý do cụ thể..."
+            />
+          </Form.Item>
+        )}
 
         {/* 👇 Chỉ hiện khi sick */}
         {leaveType === "sick" && (
-            <Form.Item shouldUpdate>
-                {({ getFieldValue }) => {
-                    const isSick = getFieldValue("leave_type") === "sick";
-
-                    return (
-                    <motion.div
-                        initial={false}
-                        animate={{
-                        height: isSick ? "auto" : 0,
-                        opacity: isSick ? 1 : 0,
-                        marginTop: isSick ? 16 : 0
-                        }}
-                        transition={{ duration: 0.25 }}
-                        style={{ overflow: "hidden" }}
-                    >
-                        <Form.Item
-                        label="Medical Proof"
-                        name="attachments"
-                        rules={
-                            isSick
-                            ? [{ required: true, message: "Please upload medical proof" }]
-                            : []
-                        }
-                        >
-                        <Upload beforeUpload={() => false}>
-                            <Button>Upload file</Button>
-                        </Upload>
-                        </Form.Item>
-                    </motion.div>
-                    );
-                }}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: 0.25 }}
+            style={{ overflow: "hidden" }}
+          >
+            <Form.Item
+              label="Medical Proof (optional)"
+              name="attachments"
+              // ❌ bỏ required
+            >
+              <Upload beforeUpload={() => false}>
+                <Button icon={<UploadOutlined />}>
+                  Upload file (optional)
+                </Button>
+              </Upload>
             </Form.Item>
+          </motion.div>
         )}
 
       </Form>
