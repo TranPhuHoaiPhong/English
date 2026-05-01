@@ -5,7 +5,8 @@ import {
   CalendarOutlined,
   SettingOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  HistoryOutlined
 } from "@ant-design/icons";
 
 import { useState } from "react";
@@ -22,7 +23,7 @@ function Dashboard() {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       
-      {/* SIDEBAR */}
+      {/* SIDEBAR */} 
       <Sider
         collapsible
         collapsed={collapsed}
@@ -60,6 +61,11 @@ function Dashboard() {
               key: "/dashboard/leaverequests",
               icon: <CalendarOutlined />,
               label: "Leave Requests"
+            },
+            {
+              key: "/dashboard/leavehistory",
+              icon: <HistoryOutlined />,
+              label: "History"
             },
             {
               key: "/dashboard/settings",
