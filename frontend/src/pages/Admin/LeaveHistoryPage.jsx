@@ -3,11 +3,13 @@ import {
   Tag,
   Select,
   Input,
-  Space
+  Space,
+  Popover,
+  Image
 } from "antd";
 import { useState } from "react";
 
-import { leaveRequestsData } from "./leaveData";
+import { leaveRequestsData } from "../../services/Admin/LeaveRequests";
 
 const { Option } = Select;
 
@@ -49,6 +51,44 @@ function LeaveHistoryPage() {
     REJECTED: "red"
   };
 
+  // 🎯 render proof
+  const renderProofStatus = (r) => {
+    if (r.leaveType !== "SICK") return "-";
+
+    // ✅ có proof và đã submit → hover xem
+    if (r.proofStatus === "SUBMITTED" && r.medicalProof) {
+      return (
+        <Popover
+          content={
+            <Image
+              src={r.medicalProof}
+              width={200}
+            />
+          }
+        >
+          <Tag color="blue">Submitted</Tag>
+        </Popover>
+      );
+    }
+
+    // 🟠 đang nộp
+    if (r.proofStatus === "SUBMITTING") {
+      return <Tag color="orange">Submitting</Tag>;
+    }
+
+    // 🟢 đã duyệt proof
+    if (r.proofStatus === "APPROVED") {
+      return <Tag color="green">Approved</Tag>;
+    }
+
+    // 🔴 bị từ chối proof
+    if (r.proofStatus === "REJECTED") {
+      return <Tag color="red">Rejected</Tag>;
+    }
+
+    return <Tag>None</Tag>;
+  };
+
   const columns = [
     {
       title: "Name",
@@ -85,16 +125,51 @@ function LeaveHistoryPage() {
     },
     {
       title: "Proof Status",
-      render: (_, r) => {
-        if (r.leaveType !== "SICK") return "-";
-        return r.proofStatus || "None";
-      }
+      render: (_, r) => renderProofStatus(r)
     }
   ];
 
   return (
     <>
-      <h2>Leave History</h2>
+      {/* FILTER */}
+      <Space style={{ marginBottom: 16 }}>
+        <Select
+          value={statusFilter}
+          onChange={setStatusFilter}
+          style={{ width: 150 }}
+        >
+          <Option value="ALL">All Status</Option>
+          <Option value="PENDING">Pending</Option>
+          <Option value="APPROVED">Approved</Option>
+          <Option value="REJECTED">Rejected</Option>
+        </Select>
+
+        <Select
+          value={typeFilter}
+          onChange={setTypeFilter}
+          style={{ width: 150 }}
+        >
+          <Option value="ALL">All Type</Option>
+          <Option value="SICK">Sick</Option>
+          <Option value="ANNUAL">Annual</Option>
+          <Option value="UNPAID">Unpaid</Option>
+          <Option value="OTHER">Other</Option>
+        </Select>
+
+        <Input
+          placeholder="Search name..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          style={{ width: 250 }}
+        />
+      </Space>
+
+      {/* TABLE */}
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowKey="key"
+      />
     </>
   );
 }

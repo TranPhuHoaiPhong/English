@@ -5,7 +5,7 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import AdminDashboard from "../pages/Admin/Admin";
 import EmployeePage from "../pages/Admin/Employee";
 import LeavePage from "../pages/Admin/LeaveRequests";
-// import LeavePage from "../pages/Admin/LeaveHistoryPage";
+import LeaveHistoryPage from "../pages/Admin/LeaveHistoryPage";
 
 export const routes = [
   { path: "/", element: LoginPage },
