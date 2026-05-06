@@ -1,25 +1,43 @@
 import { useState } from "react";
+import axios from "axios";
 
 export function useLogin() {
     const [email, setMail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (!email || !password) {
             setError("Please enter both email and password.");
             return false;
         }
 
-        if (email === "member@gmail.com" && password === "1") {
-            setError("");
-            return "member";
-        } else if (email === "admin@gmail.com" && password === "11") {
-            setError("");
-            return "admin";
-        } else {
-            setError("Invalid email or password.");
-            return false;
+        try {
+            const res = await axios.post(
+            "http://localhost:5000/api/admin/sign-in",
+            { email, password },
+            {
+                withCredentials: true
+            }
+            );
+
+            const data = res.data;
+
+            localStorage.setItem("accessToken", data.accessToken);
+
+            if (data.role === "admin") {
+                setError("");
+                return "admin";
+            } else if (data.role === "member") {
+                setError("");
+                return "member";
+            } else {
+                setError("Unknown user role.");
+                return false;
+            }
+
+        } catch (err) {
+            setError(err.response?.data?.message || "Login failed");
         }
     }
  

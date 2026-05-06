@@ -8,6 +8,7 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     email,
@@ -18,10 +19,13 @@ function LoginPage() {
     handleLogin
   } = useLogin();
 
-  const onSubmit = () => {
-    const role = handleLogin();
+  const onSubmit = async () => {
+    setLoading(true);
+    const role = await handleLogin();
+
+    setLoading(false);
     
-    if (role === "member") {
+    if (role === "employee" || role === "manager") {
       navigate("/home");
     }
     else if (role === "admin") {
@@ -30,68 +34,75 @@ function LoginPage() {
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        
-        <div className="login-left"></div>
+    <>
+      <div className="login-container">
+        <div className="login-card">
+          
+          <div className="login-left"></div>
 
-        <div className="login-right">
-          <div className="login-content">
-            
-            <img src="https://sunluxe.com.sg/Content/Upload/Images/1764292623000.png" alt="Logo" className="logo" />
-            <p className="subtitle">Sign into your account</p>
+          <div className="login-right">
+            <div className="login-content">
+              
+              <img src="https://sunluxe.com.sg/Content/Upload/Images/1764292623000.png" alt="Logo" className="logo" />
+              <p className="subtitle">Sign into your account</p>
 
-            <input
-              type="email"
-              placeholder="Email address"
-              className="input"
-              value={email}
-              onChange={(e) => setMail(e.target.value)}
-            />
-            
-
-            <div style={{ position: "relative" }}>
               <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                type="email"
+                placeholder="Email address"
                 className="input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ paddingRight: 40 }}
+                value={email}
+                onChange={(e) => setMail(e.target.value)}
               />
+              
 
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "35%",
-                  transform: "translateY(-50%)",
-                  cursor: "pointer",
-                  color: "#888",
-                  fontSize: "large"
-                }}
-              >
-                {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-              </span>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ paddingRight: 40 }}
+                />
+
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "35%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    color: "#888",
+                    fontSize: "large"
+                  }}
+                >
+                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                </span>
+              </div>
+
+              <p className="error">{error}</p>
+              <button className="login-btn" onClick={onSubmit}>LOGIN</button>
+
+              <p className="register">
+                Don't remmember password? <span>Click here</span>
+              </p>
+
+              <p className="policy">
+                Terms of use. Privacy policy
+              </p>
+
             </div>
-
-            <p className="error">{error}</p>
-            <button className="login-btn" onClick={onSubmit}>LOGIN</button>
-
-            <p className="register">
-              Don't remmember password? <span>Click here</span>
-            </p>
-
-            <p className="policy">
-              Terms of use. Privacy policy
-            </p>
-
           </div>
-        </div>
 
+        </div>
       </div>
-    </div>
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
+    </>
   );
 }
 

@@ -13,15 +13,17 @@ const EmployeeSchema = new mongoose.Schema(
       unique: true,
       match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
     },
-    department: String,
-    managerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      match: /^(0|\+84)[0-9]{9}$/,
     },
+    department: String,
     role: {
       type: String,
-      enum: ["admin", "member"], 
-      default: "member",         
+      enum: ["admin", "employee", "manager"],
+      default: "employee",         
     },
     password: {
       type: String,
@@ -32,9 +34,15 @@ const EmployeeSchema = new mongoose.Schema(
 );
 
 
-function generateCode() {
+function generateCode(department) {
   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `EMP-${random}`;
+
+  // lấy 2-3 ký tự đầu của department
+  const prefix = department
+    ? department.replace(/\s+/g, "").substring(0, 3).toUpperCase()
+    : "EMP";
+
+  return `${prefix}-${random}`;
 }
 
 EmployeeSchema.pre("save", async function () {

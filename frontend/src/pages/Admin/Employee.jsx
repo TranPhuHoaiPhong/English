@@ -10,10 +10,11 @@ import {
   message
 } from "antd";
 import { useState } from "react";
+import { departmentsData, employeesData } from "../../services/Admin/employeeData";
 
 const { Option } = Select;
 
-// 🔥 remove dấu
+// remove dấu tiếng Việt
 const removeVietnameseTones = (str) => {
   return str
     .normalize("NFD")
@@ -23,101 +24,22 @@ const removeVietnameseTones = (str) => {
 };
 
 function EmployeePage() {
-  const [departments] = useState([
-    { _id: "D1", name: "IT" },
-    { _id: "D2", name: "HR" }
-  ]);
-
-  const [data, setData] = useState([
-    {
-      key: "1",
-      name: "Trưởng phòng IT",
-      code: "EMP010",
-      email: "manager.it@gmail.com",
-      phone: "0901111111",
-      departmentId: "D1",
-      role: "MANAGER",
-      managerId: null
-    },
-    {
-      key: "2",
-      name: "Nguyễn Văn A",
-      code: "EMP001",
-      email: "vana@gmail.com",
-      phone: "0901234567",
-      departmentId: "D1",
-      role: "EMPLOYEE",
-      managerId: "1"
-    },
-    {
-      key: "3",
-      name: "Trần Thị B",
-      code: "EMP002",
-      email: "thib@gmail.com",
-      phone: "0912345678",
-      departmentId: "D1",
-      role: "EMPLOYEE",
-      managerId: "1"
-    },
-    {
-      key: "4",
-      name: "Lê Văn C",
-      code: "EMP003",
-      email: "vanc@gmail.com",
-      phone: "0933333333",
-      departmentId: "D1",
-      role: "EMPLOYEE",
-      managerId: "1"
-    },
-
-    // HR
-    {
-      key: "5",
-      name: "Trưởng phòng HR",
-      code: "EMP020",
-      email: "manager.hr@gmail.com",
-      phone: "0988888888",
-      departmentId: "D2",
-      role: "MANAGER",
-      managerId: null
-    },
-    {
-      key: "6",
-      name: "Phạm Thị D",
-      code: "EMP004",
-      email: "thid@gmail.com",
-      phone: "0977777777",
-      departmentId: "D2",
-      role: "EMPLOYEE",
-      managerId: "5"
-    },
-
-    {
-      key: "8",
-      name: "Admin Tổng",
-      code: "EMP999",
-      email: "admin@gmail.com",
-      phone: "0900000000",
-      departmentId: "D1",
-      role: "ADMIN",
-      managerId: null
-    }
-  ]);
+  const [departments] = useState(departmentsData);
+  const [data, setData] = useState(employeesData);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
-  const [selectedDept, setSelectedDept] = useState(null);
   const [roleFilter, setRoleFilter] = useState("EMPLOYEE");
   const [searchText, setSearchText] = useState("");
   const [form] = Form.useForm();
 
   const rolePriority = {
+    ADMIN: 1,
     MANAGER: 2,
-    EMPLOYEE: 3,
-    ADMIN: 1
+    EMPLOYEE: 3
   };
 
-  // 🔥 filter + search
+  // filter + search
   const filteredData = data
     .filter((item) => {
       const matchRole =
@@ -131,13 +53,12 @@ function EmployeePage() {
         removeVietnameseTones(item.name.toLowerCase()).includes(keyword) ||
         item.email.toLowerCase().includes(keyword) ||
         item.code.toLowerCase().includes(keyword) ||
-        (item.phone || "").includes(keyword); // 👈 search phone
+        (item.phone || "").includes(keyword);
 
       return matchRole && matchSearch;
     })
     .sort((a, b) => {
       if (roleFilter !== "ALL") return 0;
-
       return (
         (rolePriority[a.role] || 99) -
         (rolePriority[b.role] || 99)
@@ -150,10 +71,8 @@ function EmployeePage() {
 
     if (record) {
       form.setFieldsValue(record);
-      setSelectedDept(record.departmentId);
     } else {
       form.resetFields();
-      setSelectedDept(null);
     }
   };
 
@@ -183,22 +102,14 @@ function EmployeePage() {
     message.success("Đã xóa");
   };
 
-  const managers = data.filter((item) => {
-    if (!selectedDept) return item.role === "MANAGER";
-    return (
-      item.role === "MANAGER" &&
-      item.departmentId === selectedDept
-    );
-  });
-
   const columns = [
-    { title: "Name", dataIndex: "name", width: "15%" },
+    { title: "Name", dataIndex: "name", width: "18%" },
     { title: "Code", dataIndex: "code", width: "10%" },
-    { title: "Email", dataIndex: "email", width: "20%" },
-    { title: "Phone", dataIndex: "phone", width: "12%" }, // 👈 mới
+    { title: "Email", dataIndex: "email", width: "22%" },
+    { title: "Phone", dataIndex: "phone", width: "12%" },
     {
       title: "Department",
-      width: "12%",
+      width: "15%",
       render: (_, record) => {
         const dept = departments.find(
           (d) => d._id === record.departmentId
@@ -208,23 +119,9 @@ function EmployeePage() {
     },
     { title: "Role", dataIndex: "role", width: "10%" },
     {
-      title: "Manager",
+      title: "Action",
       width: "13%",
       render: (_, record) => {
-        const manager = data.find(
-          (m) => m.key === record.managerId
-        );
-        return manager ? manager.name : "-";
-      }
-    },
-    {
-      title: "Action",
-      width: "10%",
-      render: (_, record) => {
-        const hasChild = data.some(
-          (e) => e.managerId === record.key
-        );
-
         const isAdmin = record.role === "ADMIN";
 
         return (
@@ -235,7 +132,7 @@ function EmployeePage() {
               </Button>
             )}
 
-            {!isAdmin && !hasChild && (
+            {!isAdmin && (
               <Popconfirm
                 title="Sure to delete?"
                 onConfirm={() => handleDelete(record.key)}
@@ -301,16 +198,7 @@ function EmployeePage() {
         onOk={handleSubmit}
         onCancel={() => setIsModalOpen(false)}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onValuesChange={(changed) => {
-            if (changed.departmentId) {
-              setSelectedDept(changed.departmentId);
-              form.setFieldsValue({ managerId: null });
-            }
-          }}
-        >
+        <Form form={form} layout="vertical">
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
@@ -330,7 +218,6 @@ function EmployeePage() {
             <Input />
           </Form.Item>
 
-          {/* 👇 PHONE */}
           <Form.Item
             name="phone"
             label="Phone"
@@ -364,16 +251,6 @@ function EmployeePage() {
               <Option value="EMPLOYEE">EMPLOYEE</Option>
               <Option value="MANAGER">MANAGER</Option>
               <Option value="ADMIN">ADMIN</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="managerId" label="Manager">
-            <Select allowClear>
-              {managers.map((m) => (
-                <Option key={m.key} value={m.key}>
-                  {m.name}
-                </Option>
-              ))}
             </Select>
           </Form.Item>
         </Form>
