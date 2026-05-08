@@ -6,7 +6,7 @@ const {
 } = require("../services/JwtService/JwtService");
 
 const createEmployeeService = async (data) => {
-  const { name, email, department, managerId, password, role, phone } = data;
+  const { name, email, department, password, role, phone } = data;
 
   if (!name || !email || !phone) {
     return {
@@ -53,7 +53,6 @@ const createEmployeeService = async (data) => {
     name,
     email,
     department,
-    managerId,
     phone,
     password: hash,
     role: role || "employee"
@@ -103,7 +102,17 @@ const loginEmployeeService = async ({ email, password }) => {
   };
 };
 
+const getEmployeeService = async (data) => {
+  const employees = await Employee.find();
+  
+  return {
+    status: "SUCCESS",
+    data: employees,
+  };
+};
+
 module.exports = {
   createEmployeeService,
-  loginEmployeeService
+  loginEmployeeService,
+  getEmployeeService
 };

@@ -14,7 +14,7 @@ export function useLogin() {
 
         try {
             const res = await axios.post(
-            "http://localhost:5000/api/admin/sign-in",
+            `${import.meta.env.VITE_BACKEND_URL}/api/admin/sign-in`,
             { email, password },
             {
                 withCredentials: true

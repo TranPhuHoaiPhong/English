@@ -72,7 +72,27 @@ const loginEmployee = async (req, res) => {
   }
 };
 
+const getEmployees = async (req, res) => {
+  try {
+    const result = await EmployeeService.getEmployeeService();
+
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(201).json(result);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error",
+    });
+  }
+};
+
 module.exports = {
   createEmployee,
-  loginEmployee
+  loginEmployee,
+  getEmployees
 };
