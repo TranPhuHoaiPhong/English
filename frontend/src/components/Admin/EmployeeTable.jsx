@@ -31,7 +31,7 @@ function EmployeeTable({
       title: "Action",
       width: "13%",
       render: (_, record) => {
-        const isAdmin = record.role === "ADMIN";
+        const isAdmin = record.role === "admin";
 
         return (
           <Space>
@@ -44,7 +44,7 @@ function EmployeeTable({
             {!isAdmin && (
               <Popconfirm
                 title="Sure to delete?"
-                onConfirm={() => handleDelete(record.key)}
+                onConfirm={() => handleDelete(record._id)}
               >
                 <Button danger>Delete</Button>
               </Popconfirm>

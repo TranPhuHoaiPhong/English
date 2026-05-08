@@ -99,28 +99,19 @@ function EmployeePage() {
 
       const values = await form.validateFields();
 
-      // UPDATE
       if (editingEmployee) {
-
         const data = await updateEmployee(
           editingEmployee._id,
           values
         );
 
-        console.log("Updated:", data);
-
-        message.success("Cập nhật thành công");
-
+        message.success("Updated successfully");
       } 
       
-      // CREATE
       else {
-
         const data = await createEmployee(values);
 
-        console.log("Created:", data);
-
-        message.success("Thêm thành công");
+        message.success("Added successfully");
       }
 
       await fetchEmployees();
@@ -131,7 +122,7 @@ function EmployeePage() {
 
       console.log(error);
 
-      message.error("Có lỗi xảy ra");
+      message.error("An error occurred");
     }
   };
 
@@ -140,7 +131,7 @@ function EmployeePage() {
 
       await deleteEmployee(id);
 
-      message.success("Xóa thành công");
+      message.success("Deleted successfully");
 
       await fetchEmployees();
 
@@ -148,7 +139,7 @@ function EmployeePage() {
 
       console.log(error);
 
-      message.error("Xóa thất bại");
+      message.error("Failed to delete employee");
     }
   };
 

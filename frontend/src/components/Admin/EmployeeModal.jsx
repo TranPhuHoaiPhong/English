@@ -81,7 +81,7 @@ function EmployeeModal({
 
         {!editingEmployee && (
         <Form.Item
-          name="password"
+          name="password" 
           label="Password"
           rules={[
             {

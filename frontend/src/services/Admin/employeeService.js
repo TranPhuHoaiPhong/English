@@ -40,7 +40,7 @@ export const createEmployee = async (data) => {
 
   return res.data;
 };
-
+ 
 export const updateEmployee = async (id, data) => {
   const accessToken = localStorage.getItem("accessToken");
 
@@ -62,9 +62,20 @@ export const updateEmployee = async (id, data) => {
 };
 
 export const deleteEmployee = async (id) => {
-  const res = await axios.delete(
-    `${API_URL}/api/admin/employees/${id}`
-  );
+  const accessToken = localStorage.getItem("accessToken");
 
+  if (!accessToken) {
+    throw new Error("No access token found");
+  }
+
+  const res = await axios.delete(
+    `${API_URL}/api/admin/employees/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  );
+ 
   return res.data;
 };
