@@ -102,9 +102,14 @@ const loginEmployeeService = async ({ email, password }) => {
   };
 };
 
-const getEmployeeService = async (data) => {
-  const employees = await Employee.find();
-  
+const getEmployeeService = async () => {
+  const employees =
+    await Employee.find()
+      .populate(
+        "department",
+        "name"
+      );
+
   return {
     status: "SUCCESS",
     data: employees,

@@ -4,23 +4,25 @@ import { Form, message } from "antd";
 
 import {
   departmentsData
-} from "../../services/Admin/employeeData";
+} from "../../services/Admin/Employee/employeeData";
+import { getDepartments } from "../../services/Admin/Department/departmentService";
+
 
 import removeVietnameseTones from "../../utils/removeVietnameseTones";
 
-import EmployeeFilter from "../../components/Admin/EmployeeFilter";
-import EmployeeTable from "../../components/Admin/EmployeeTable";
-import EmployeeModal from "../../components/Admin/EmployeeModal";
+import EmployeeFilter from "../../components/Admin/Employee/EmployeeFilter";
+import EmployeeTable from "../../components/Admin/Employee/EmployeeTable";
+import EmployeeModal from "../../components/Admin/Employee/EmployeeModal";
 
 import {
   getEmployees,
   createEmployee,
   updateEmployee,
   deleteEmployee
-} from "../../services/Admin/employeeService";
+} from "../../services/Admin/Employee/employeeService";
 
 function EmployeePage() {
-  const [departments] = useState(departmentsData);
+  const [departments, setDepartments] = useState([]);
   const [data, setData] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,6 +40,8 @@ function EmployeePage() {
     try {
       const data = await getEmployees();
       setData(data);
+      const departments = await getDepartments();
+      setDepartments(departments);
     } catch (error) {
       console.log(error);
       message.error("Can not fetch employees");

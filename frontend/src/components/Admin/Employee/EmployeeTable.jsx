@@ -14,7 +14,7 @@ function EmployeeTable({
 
     {
       title: "Department",
-      dataIndex: "department",
+      dataIndex: ["department", "name"],
       width: "15%",
       },
 

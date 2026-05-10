@@ -1,67 +1,171 @@
 const mongoose = require("mongoose");
+const Department = require("./Department");
 
 const EmployeeSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: {
+      type: String,
+      required: true
+    },
+
     code: {
       type: String,
-      unique: true,
+      unique: true
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
-      match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+      match:
+        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
     },
+
     phone: {
       type: String,
       required: true,
       unique: true,
-      match: /^(0|\+84)[0-9]{9}$/,
+      match:
+        /^(0|\+84)[0-9]{9}$/
     },
-    department: String,
+
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true
+    },
+
     role: {
       type: String,
-      enum: ["admin", "employee", "manager"],
-      default: "employee",         
+
+      enum: [
+        "admin",
+        "employee",
+        "manager"
+      ],
+
+      default: "employee"
     },
+
     password: {
       type: String,
-      required: true,
+      required: true
     },
+
+    leaveBalance: {
+      type: Number,
+      default: 13
+    },
+
+    leaveBalanceYear: {
+      type: Number,
+      default: () =>
+        new Date().getFullYear()
+    },
+
+    status: {
+      type: String,
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE"
+    }
   },
-  { timestamps: true }
+
+  {
+    timestamps: true
+  }
 );
 
 
-function generateCode(department) {
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+// ======================
+// GENERATE CODE
+// ======================
 
-  // lấy 2-3 ký tự đầu của department
-  const prefix = department
-    ? department.replace(/\s+/g, "").substring(0, 3).toUpperCase()
-    : "EMP";
+async function generateCode(
+  departmentId
+) {
+
+  const random =
+    Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
+
+  let prefix = "EMP";
+
+  // 📌 tìm department
+  const department =
+    await Department.findById(
+      departmentId
+    );
+
+  // 📌 có department
+  if (department?.name) {
+
+    prefix =
+      department.name
+        .replace(/\s+/g, "")
+        .substring(0, 3)
+        .toUpperCase();
+  }
 
   return `${prefix}-${random}`;
 }
 
-EmployeeSchema.pre("save", async function () {
-  if (!this.code) {
-    let isUnique = false;
 
-    while (!isUnique) {
-      const newCode = generateCode();
+// ======================
+// PRE SAVE
+// ======================
 
-      const existing = await mongoose.models.Employee.findOne({
-        code: newCode,
-      });
+EmployeeSchema.pre(
+  "save",
 
-      if (!existing) {
-        this.code = newCode;
-        isUnique = true;
+  async function () {
+
+    // 📌 reset leave mỗi năm
+    const currentYear =
+      new Date().getFullYear();
+
+    if (
+      this.leaveBalanceYear !==
+      currentYear
+    ) {
+
+      this.leaveBalance = 13;
+
+      this.leaveBalanceYear =
+        currentYear;
+    }
+
+    // 📌 generate code
+    if (!this.code) {
+
+      let isUnique = false;
+
+      while (!isUnique) {
+
+        const newCode =
+          await generateCode(
+            this.department
+          );
+
+        const existing =
+          await mongoose.models.Employee.findOne({
+            code: newCode
+          });
+
+        if (!existing) {
+
+          this.code = newCode;
+
+          isUnique = true;
+        }
       }
     }
   }
-});
+);
 
-module.exports = mongoose.model("Employee", EmployeeSchema);
+module.exports =
+  mongoose.model(
+    "Employee",
+    EmployeeSchema
+  );

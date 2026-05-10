@@ -156,7 +156,6 @@ function LeaveTable({
     }
   ];
 
-  // 📌 cột proof
   const proofColumn = {
 
     title: "Medical Proof",

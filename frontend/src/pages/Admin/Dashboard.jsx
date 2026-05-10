@@ -23,11 +23,10 @@ function Dashboard() {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       
-      {/* SIDEBAR */} 
       <Sider
         collapsible
         collapsed={collapsed}
-        trigger={null} // ❌ tắt nút mặc định
+        trigger={null} 
         theme="dark"
       >
         <div
@@ -76,10 +75,8 @@ function Dashboard() {
         />
       </Sider>
 
-      {/* MAIN */}
       <Layout>
         
-        {/* HEADER */}
         <Header
           style={{
             background: "#fff",
@@ -90,7 +87,6 @@ function Dashboard() {
           }}
         >
           
-          {/* nút fold/unfold */}
           <div
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: 18, cursor: "pointer" }}
@@ -101,7 +97,6 @@ function Dashboard() {
           <div>Admin Panel</div>
         </Header>
 
-        {/* CONTENT */}
         <Content style={{ margin: 20 }}>
           <Outlet />
         </Content>

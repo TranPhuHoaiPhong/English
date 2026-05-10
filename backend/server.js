@@ -7,6 +7,8 @@ const connectDB = require("./src/config/db");
 const routes = require("./src/routes/index");
 const path = require("path");
 
+require("./src/itls/resetLeaveBalance");
+
 const app = express();
 
 app.use(
