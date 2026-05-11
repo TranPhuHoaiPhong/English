@@ -1,12 +1,4 @@
-import {
-  Table,
-  Tag,
-  Button,
-  Space,
-  Popover,
-  Image,
-  Popconfirm
-} from "antd";
+import { Table, Tag, Button, Space, Popover, Image, Popconfirm } from "antd";
 
 function LeaveTable({
   filteredData,
@@ -52,7 +44,6 @@ function LeaveTable({
     if (r.leaveType !== "SICK")
       return "-";
 
-    // 📌 có giấy xác nhận
     if (r.medicalProof) {
 
       return (
@@ -103,9 +94,7 @@ function LeaveTable({
     );
   };
 
-  // 📌 columns chính
   const baseColumns = [
-
     {
       title: "Name",
       width: 180,
@@ -114,7 +103,6 @@ function LeaveTable({
       render: (_, r) =>
         r.employee.name
     },
-
     {
       title: "Department",
       width: 180,
@@ -123,7 +111,6 @@ function LeaveTable({
       render: (_, r) =>
         r.employee.department
     },
-
     {
       title: "Type",
       width: 120,
@@ -138,7 +125,6 @@ function LeaveTable({
         </Tag>
       )
     },
-
     {
       title: "Date",
       width: 220,
@@ -147,7 +133,6 @@ function LeaveTable({
       render: (_, r) =>
         `${r.startDate} → ${r.endDate}`
     },
-
     {
       title: "Reason",
       dataIndex: "reason",
@@ -166,26 +151,21 @@ function LeaveTable({
       renderProof(r)
   };
 
-  // 📌 action columns
   const actionColumns = [
-
     {
       title: "Status",
-
       width: 140,
 
       render: (_, r) =>
         renderStatus(r.status)
     },
-
     {
       title: "Action",
-
       width: 300,
 
       render: (_, r) => {
 
-        // 📌 pending
+        // pending
         if (r.status === "PENDING") {
 
           return (
@@ -215,11 +195,8 @@ function LeaveTable({
           );
         }
 
-        // 📌 approve proof
-        if (
-          r.status === "APPROVED" &&
-          r.proofStatus === "SUBMITTED"
-        ) {
+        // approve proof
+        if (r.status === "APPROVED" && r.proofStatus === "SUBMITTED") {
 
           return (
             <Space>
@@ -248,7 +225,6 @@ function LeaveTable({
           );
         }
 
-        // 📌 giữ layout không nhảy
         return (
           <div
             style={{
@@ -260,20 +236,18 @@ function LeaveTable({
     }
   ];
 
-  // 📌 nếu có sick leave thì thêm cột proof
+  // nếu có sick leave thì thêm cột proof
   const hasSick = filteredData.some(
     (item) =>
       item.leaveType === "SICK"
   );
 
   const columns = hasSick
-
     ? [
         ...baseColumns,
         proofColumn,
         ...actionColumns
       ]
-
     : [
         ...baseColumns,
         ...actionColumns
@@ -281,26 +255,20 @@ function LeaveTable({
 
   return (
     <div style={{ width: "100%" }}>
-
       <Table
         columns={columns}
         dataSource={filteredData}
         rowKey="key"
-
         tableLayout="fixed"
-
         pagination={false}
-
         scroll={{
           x: "max-content",
           y: 700
         }}
-
         style={{
           width: "100%"
         }}
       />
-
     </div>
   );
 }

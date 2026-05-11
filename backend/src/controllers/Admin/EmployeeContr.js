@@ -1,4 +1,4 @@
-const EmployeeService = require("../services/EmployeeSer");
+const EmployeeService = require("../../services/Admin/EmployeeSer");
 
 const createEmployee = async (req, res) => {
   try {
@@ -22,8 +22,6 @@ const createEmployee = async (req, res) => {
 const loginEmployee = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    console.log("Login attempt:", { email, password });
 
     if (!email || !password) {
       return res.status(400).json({
@@ -57,7 +55,15 @@ const loginEmployee = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: result.message,
+      id: result.id,
+      name: result.name,
+      code: result.code,
+      email: result.email,
+      phone: result.phone,
+      department: result.department,
       role: result.role,
+      leaveBalance: result.leaveBalance,
+      status: result.status,
       accessToken: result.accessToken,
       refreshToken: result.refreshToken
     });

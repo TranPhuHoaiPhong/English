@@ -10,12 +10,9 @@ import { createDepartment, updateDepartment } from
 "../../../services/Admin/Department/departmentService";
 
 function DepartmentFormModal({
-
   open,
   setOpen,
-
   fetchDepartments,
-
   editingDepartment
 
 }) {

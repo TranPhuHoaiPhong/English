@@ -7,15 +7,16 @@ function EmployeeTable({
   handleDelete
 }) {
   const columns = [
-    { title: "Name", dataIndex: "name", width: "18%" },
+    { title: "Name", dataIndex: "name", width: "15%" },
     { title: "Code", dataIndex: "code", width: "10%" },
-    { title: "Email", dataIndex: "email", width: "22%" },
-    { title: "Phone", dataIndex: "phone", width: "12%" },
+    { title: "Leave Balance", dataIndex: "leaveBalance", width: "10%" },
+    { title: "Email", dataIndex: "email", width: "20%" },
+    { title: "Phone", dataIndex: "phone", width: "10%" },
 
     {
       title: "Department",
       dataIndex: ["department", "name"],
-      width: "15%",
+      width: "12%",
       },
 
     {

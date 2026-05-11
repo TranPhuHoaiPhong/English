@@ -24,7 +24,7 @@ function LeaveFilter({
         <Option value="SICK">Sick</Option>
         <Option value="ANNUAL">Annual</Option>
         <Option value="UNPAID">Unpaid</Option>
-        <Option value="OTHER">Other</Option>
+        <Option value="EMERGENCY">Emergency</Option>
       </Select>
 
       <Input

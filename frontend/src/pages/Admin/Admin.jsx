@@ -16,12 +16,23 @@ import {
 import { useState, useEffect } from "react";
 
 import DepartmentModal from "../../components/Admin/Department/DepartmentModal";
+import HolidayModal from "../../components/Admin/Holiday/HolidayModal";
 import { getDepartments } from "../../services/Admin/Department/departmentService";
+import {
+  getHolidays,
+  createHoliday,
+  updateHoliday,
+  deleteHoliday
+}
+from "../../services/Admin/Holiday/Holiday";
 
 function AdminDashboard() {
 
   const [openDepartmentModal, setOpenDepartmentModal] = useState(false);
   const [departments, setDepartments] = useState([]);
+
+  const [openHolidayModal, setOpenHolidayModal] = useState(false);
+  const [holidays, setHolidays] = useState([]);
 
   const fetchDepartments = async () => {
     try {
@@ -34,8 +45,20 @@ function AdminDashboard() {
     }
   };
 
+  const fetchHolidays = async () => {
+    try {
+      const holiday = await getHolidays();
+      setHolidays(holiday);
+    } catch (error) {
+      message.error(
+        "Failed to fetch holidays"
+      );
+    }
+  };
+
   useEffect(() => {
     fetchDepartments();
+    fetchHolidays();
   }, []);
 
   return (
@@ -86,7 +109,7 @@ function AdminDashboard() {
           </Card>
         </Col>
 
-        <Col xs={24} sm={12} md={12} lg={6}>
+        {/* <Col xs={24} sm={12} md={12} lg={6}>
           <Card>
             <Statistic
               title="Pending"
@@ -95,6 +118,30 @@ function AdminDashboard() {
                 <ClockCircleOutlined />
               }
             />
+          </Card>
+        </Col> */}
+
+        <Col xs={24} sm={12} md={12} lg={6}>
+          <Card
+            hoverable
+            onClick={() =>
+              setOpenHolidayModal(
+                true
+              )
+            }
+            style={{
+              cursor: "pointer"
+            }}
+          >
+
+            <Statistic
+              title="Holidays"
+              value={holidays.length}
+              prefix={
+                <CalendarOutlined />
+              }
+            />
+
           </Card>
         </Col>
 
@@ -107,6 +154,26 @@ function AdminDashboard() {
         departments={departments}
         fetchDepartments={
           fetchDepartments
+        }
+      />
+
+      <HolidayModal
+        open={openHolidayModal}
+        setOpen={
+          setOpenHolidayModal
+        }
+        fetchHolidays={
+          fetchHolidays
+        }
+        holidays={holidays}
+        createHoliday={
+          createHoliday
+        }
+        updateHoliday={
+          updateHoliday
+        }
+        deleteHoliday={
+          deleteHoliday
         }
       />
 

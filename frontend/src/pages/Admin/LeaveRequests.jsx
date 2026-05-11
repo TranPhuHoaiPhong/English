@@ -1,31 +1,15 @@
 import { useState } from "react";
-
-import { leaveRequestsData }
-from "../../services/Admin/LeaveRequests";
-
-import removeVietnameseTones
-from "../../utils/removeVietnameseTones";
-
-import LeaveFilter
-from "../../components/Admin/LeaveFilter";
-
-import LeaveTable
-from "../../components/Admin/LeaveTable";
+import { leaveRequestsData } from "../../services/Admin/LeaveRequests";
+import removeVietnameseTones from "../../utils/removeVietnameseTones";
+import LeaveFilter from "../../components/Admin/LeaveRequest/LeaveFilter";
+import LeaveTable from "../../components/Admin/LeaveRequest/LeaveTable";
 
 function LeavePage() {
+  const [filter, setFilter] = useState("ANNUAL");
+  const [searchText, setSearchText] = useState("");
+  const [data, setData] = useState(leaveRequestsData);
 
-  const [filter, setFilter] =
-    useState("ANNUAL");
-
-  const [searchText, setSearchText] =
-    useState("");
-
-  const [data, setData] =
-    useState(leaveRequestsData);
-
-  const filteredData = data.filter(
-    (item) => {
-
+  const filteredData = data.filter((item) => {
       const matchFilter =
         filter === "ALL" ||
         item.leaveType === filter;
@@ -48,7 +32,6 @@ function LeavePage() {
   );
 
   const handleApprove = (record) => {
-
     setData((prev) =>
       prev.map((item) => {
 
@@ -75,7 +58,6 @@ function LeavePage() {
   };
 
   const handleReject = (record) => {
-
     setData((prev) =>
       prev.map((item) =>
         item.key === record.key
@@ -103,7 +85,6 @@ function LeavePage() {
   };
 
   const rejectProof = (record) => {
-
     setData((prev) =>
       prev.map((item) =>
         item.key === record.key

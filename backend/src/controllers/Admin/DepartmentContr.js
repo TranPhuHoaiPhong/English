@@ -1,6 +1,4 @@
-const DepartmentService = require(
-  "../services/DepartmentSer"
-);
+const DepartmentService = require("../../services/Admin/DepartmentSer");
 
 const createDepartment = async (req, res) => {
 

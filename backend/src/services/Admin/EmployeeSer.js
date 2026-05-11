@@ -1,9 +1,9 @@
-const Employee = require("../models/Employee");
+const Employee = require("../../models/Employee");
 const bcrypt = require("bcryptjs");
 const {
   generateAccessToken,
   generateRefreshToken
-} = require("../services/JwtService/JwtService");
+} = require("../JwtService/JwtService");
 
 const createEmployeeService = async (data) => {
   const { name, email, department, password, role, phone } = data;
@@ -96,7 +96,15 @@ const loginEmployeeService = async ({ email, password }) => {
   return {
     success: true,
     message: "Login successful",
+    id: user._id,
+    name: user.name,
+    code: user.code,
+    email: user.email,
+    phone: user.phone,
+    department: user.department,
     role: user.role,
+    leaveBalance: user.leaveBalance,
+    status: user.status,
     accessToken,
     refreshToken
   };

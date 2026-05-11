@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const LeaveRequestSchema = new mongoose.Schema({
   employeeId: {
@@ -8,7 +8,8 @@ const LeaveRequestSchema = new mongoose.Schema({
 
   leaveType: {
     type: String,
-    enum: ["SICK", "ANNUAL", "UNPAID", "OTHER"]
+    enum: ["SICK", "ANNUAL", "UNPAID", "EMERGENCY"],
+    required: true
   },
 
   startDate: Date,
@@ -32,4 +33,7 @@ const LeaveRequestSchema = new mongoose.Schema({
   proofDueDate: Date
 }, { timestamps: true });
 
-export default mongoose.model("LeaveRequest", LeaveRequestSchema);
+module.exports = mongoose.model(
+  "LeaveRequest",
+  LeaveRequestSchema
+);

@@ -77,7 +77,9 @@ function DepartmentTable({
       columns={columns}
       dataSource={departments}
       rowKey="_id"
-      pagination={false}
+      pagination={{
+         pageSize: 5
+      }}
       tableLayout="fixed"
     />
   );
