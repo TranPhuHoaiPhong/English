@@ -97,6 +97,25 @@ const getEmployees = async (req, res) => {
   }
 };
 
+const getAllEmployees = async (req, res) => {
+  try {
+    const result = await EmployeeService.getAllEmployeeService();
+
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(201).json(result);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error",
+    });
+  }
+};
+
 const updateEmployee = async (req, res) => {
   try {
     const result = await EmployeeService.updateEmployeeService(req.params.id, req.body);
@@ -139,6 +158,7 @@ module.exports = {
   createEmployee,
   loginEmployee,
   getEmployees,
+  getAllEmployees,
   updateEmployee,
   deleteEmployee
 };

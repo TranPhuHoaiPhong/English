@@ -7,6 +7,13 @@ const LeaveRequestSchema = new mongoose.Schema({
       ref: "Employee",
       required: true
     },
+    employeeCode: {
+      type: String
+    },
+
+    employeeName: {
+      type: String
+    },
 
     leaveType: {
       type: String,

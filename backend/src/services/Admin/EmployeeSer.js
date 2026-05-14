@@ -124,6 +124,29 @@ const getEmployeeService = async () => {
   };
 };
 
+const getAllEmployeeService = async () => {
+
+  const employees =
+    await Employee.find({
+
+      role: {
+        $ne: "admin"
+      }
+    })
+
+    .populate(
+      "department",
+      "name"
+    );
+
+  return {
+
+    status: "SUCCESS",
+
+    data: employees
+  };
+};
+
 const updateEmployeeService = async (id, data) => {
   const {
     name,
@@ -244,6 +267,7 @@ module.exports = {
   createEmployeeService,
   loginEmployeeService,
   getEmployeeService,
+  getAllEmployeeService,
   updateEmployeeService,
   deleteEmployeeService
 };

@@ -1,108 +1,62 @@
-// pages/Admin/LeavePage.jsx
-
-import {
-  useEffect,
-  useState
-} from "react";
-
-import {
-  message,
-  Button
-} from "antd";
-
-import {
-  PlusOutlined
-} from "@ant-design/icons";
-
-import removeVietnameseTones
-from "../../utils/removeVietnameseTones";
-
-import LeaveFilter
-from "../../components/Admin/LeaveRequest/LeaveFilter";
-
-import LeaveTable
-from "../../components/Admin/LeaveRequest/LeaveTable";
-
-import LeaveRequestModal
-from "../../components/Admin/LeaveRequest/LeaveRequestModal";
-
-import {
-
-  getLeaveRequest,
-
-  addLeaveRequest,
-
-  updateLeaveRequest,
-
-  deleteLeaveRequest
-
-} from "../../services/Admin/LeaveRequest/LeaveRequests";
+import { useEffect, useState } from "react";
+import { message, Button} from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import removeVietnameseTones from "../../utils/removeVietnameseTones";
+import LeaveFilter from "../../components/Admin/LeaveRequest/LeaveFilter";
+import LeaveTable from "../../components/Admin/LeaveRequest/LeaveTable";
+import LeaveRequestModal from "../../components/Admin/LeaveRequest/LeaveRequestModal";
+import { getLeaveRequest, addLeaveRequest, updateLeaveRequest, deleteLeaveRequest } from "../../services/Admin/LeaveRequest/LeaveRequests";
+import { getAllEmployees } from "../../services/Admin/Employee/employeeService";
 
 function LeavePage() {
-
-  const [filter, setFilter] =
-    useState("ALL");
-
-  const [searchText, setSearchText] =
-    useState("");
-
-  const [data, setData] =
-    useState([]);
-
-  const [openModal, setOpenModal] =
-    useState(false);
-
-  const [selectedLeave, setSelectedLeave] =
-    useState(null);
+  const [filter, setFilter] = useState("ALL");
+  const [searchText, setSearchText] = useState("");
+  const [data, setData] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState(null);
+  const [employees, setEmployees] = useState([]);
 
   // ===== fetch =====
 
-  const fetchLeaveRequests =
-    async () => {
+  const fetchLeaveRequests = async () => {
+    try {
+      const result = await getLeaveRequest();
+      setData( result.data || [] );
+    } catch {
+      message.error("Failed to fetch leave requests");
+    }
+  };
 
-      try {
-
-        const result =
-          await getLeaveRequest();
-
-        setData(
-          result.data || []
-        );
-
-      } catch {
-
-        message.error(
-          "Failed to fetch leave requests"
-        );
-      }
-    };
+  const fetchEmployees = async () => {
+    try {
+      const result = await getAllEmployees();
+      setEmployees(result || []);
+    } catch {
+      message.error("Failed to fetch employees");
+    }
+  };
 
   useEffect(() => {
-
     fetchLeaveRequests();
-
+    fetchEmployees();
   }, []);
 
   // ===== filter =====
 
-  const filteredData =
-    data.filter((item) => {
-
-      const matchFilter =
-
-        filter === "ALL" ||
-
-        item.leaveType === filter;
-
-      const keyword =
-        removeVietnameseTones(
-          searchText.toLowerCase()
-        );
-
+  const filteredData = data.filter((item) => {
+      const matchFilter = filter === "ALL" || item.leaveType === filter;
+      const keyword = removeVietnameseTones(searchText.toLowerCase());
       const matchSearch =
         removeVietnameseTones(
-          item.employeeId?.name
-            ?.toLowerCase() || ""
+          (
+            item.employeeName || ""
+          ).toLowerCase()
+        ).includes(keyword)
+        ||
+        removeVietnameseTones(
+          (
+            item.employeeCode || ""
+          ).toLowerCase()
         ).includes(keyword);
 
       return (
@@ -113,21 +67,15 @@ function LeavePage() {
 
   // ===== open detail =====
 
-  const handleOpenDetail =
-    (record) => {
-
+  const handleOpenDetail = (record) => {
       setSelectedLeave(record);
-
       setOpenModal(true);
     };
 
   // ===== approve =====
 
-  const handleApprove =
-    async (id) => {
-
+  const handleApprove = async (id) => {
       try {
-
         await updateLeaveRequest(
           id,
           {
@@ -152,8 +100,7 @@ function LeavePage() {
 
   // ===== reject =====
 
-  const handleReject =
-    async (id) => {
+  const handleReject = async (id) => {
 
       try {
 
@@ -181,8 +128,7 @@ function LeavePage() {
 
   // ===== update =====
 
-  const handleUpdate =
-    async (id, payload) => {
+  const handleUpdate = async (id, payload) => {
 
       try {
 
@@ -209,8 +155,7 @@ function LeavePage() {
 
   // ===== delete =====
 
-  const handleDelete =
-    async (id) => {
+  const handleDelete = async (id) => {
 
       try {
 
@@ -234,35 +179,21 @@ function LeavePage() {
 
   // ===== add =====
 
-  const handleAdd =
-    async (payload) => {
-
+  const handleAdd = async (payload) => {
       try {
-
-        await addLeaveRequest(
-          payload
-        );
-
+        await addLeaveRequest(payload);
         message.success(
           "Created successfully"
         );
-
         setOpenModal(false);
-
         fetchLeaveRequests();
-
       } catch {
-
-        message.error(
-          "Create failed"
-        );
+        message.error("Create failed");
       }
     };
 
   return (
-
     <>
-
       <div
         style={{
           display: "flex",
@@ -271,88 +202,64 @@ function LeavePage() {
           marginBottom: 16
         }}
       >
-
         <LeaveFilter
-
           filter={filter}
-
           setFilter={setFilter}
-
           searchText={searchText}
-
           setSearchText={
             setSearchText
           }
         />
-
         <Button
-
           type="primary"
-
           icon={<PlusOutlined />}
-
           onClick={() => {
-
             setSelectedLeave(null);
-
             setOpenModal(true);
           }}
         >
           Add Leave Request
         </Button>
-
       </div>
 
       <LeaveTable
-
         filteredData={
           filteredData
         }
-
         handleOpenDetail={
           handleOpenDetail
         }
-
         handleApprove={
           handleApprove
         }
-
         handleReject={
           handleReject
         }
       />
 
       <LeaveRequestModal
-
         open={openModal}
-
         setOpen={setOpenModal}
-
         leaveRequest={
           selectedLeave
         }
-
         handleUpdate={
           handleUpdate
         }
-
         handleDelete={
           handleDelete
         }
-
         handleAdd={
           handleAdd
         }
-
         handleApprove={
           handleApprove
         }
-
         handleReject={
           handleReject
         }
+        employees={employees}
       />
-
     </>
   );
 }

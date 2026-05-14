@@ -11,6 +11,7 @@ router.post("/sign-in", EmployeeContr.loginEmployee);
 
 router.post("/employees", authMiddleware, EmployeeContr.createEmployee);
 router.get("/employees", authMiddleware, EmployeeContr.getEmployees);
+router.get("/all-employees", authMiddleware, EmployeeContr.getAllEmployees);
 router.put("/employees/:id", authUserMiddleware, EmployeeContr.updateEmployee);
 router.delete("/employees/:id", authUserMiddleware, EmployeeContr.deleteEmployee);
 

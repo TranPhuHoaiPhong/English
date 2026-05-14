@@ -9,7 +9,6 @@ function LeaveFilter({filter, setFilter, searchText, setSearchText}) {
       style={{
         marginBottom: 16,
         display: "flex",
-        justifyContent: "space-between",
         width: "100%"
       }}
     >

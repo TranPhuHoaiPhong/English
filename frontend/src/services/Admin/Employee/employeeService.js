@@ -21,6 +21,25 @@ export const getEmployees = async () => {
   return res.data.data;
 };
 
+export const getAllEmployees = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  if (!accessToken) {
+    throw new Error("No access token found");
+  }
+ 
+  const res = await axios.get(
+    `${API_URL}/api/admin/all-employees`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  );
+
+  return res.data.data;
+};
+
 export const createEmployee = async (data) => {
   const accessToken = localStorage.getItem("accessToken");
 

@@ -27,16 +27,13 @@ function LeaveTable({
       switch (type) {
 
         case "SICK":
+        case "PERSONAL":
+        case "MATERNITY":
           return "red";
 
-        case "ANNUAL":
+        default:
           return "blue";
 
-        case "PERSONAL":
-          return "orange";
-
-        default:
-          return "purple";
       }
     };
 
@@ -47,13 +44,13 @@ function LeaveTable({
     {
       title: "Code",
 
-      width: 140,
+      width: 100,
 
       fixed: "left",
 
       render: (_, r) =>
 
-        r.employeeId?.code
+        r.employeeCode
     },
 
     {
@@ -65,13 +62,13 @@ function LeaveTable({
 
       render: (_, r) =>
 
-        r.employeeId?.name
+        r.employeeName
     },
 
     {
       title: "Type",
 
-      width: 150,
+      width: 100,
 
       render: (_, r) => (
 
