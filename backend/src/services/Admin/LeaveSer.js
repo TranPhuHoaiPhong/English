@@ -4,21 +4,7 @@ const CompanyHoliday = require("../../models/CompanyHoliday");
 
 const createLeaveRequestService = async (data) => {
 
-  const {
-
-    employeeId,
-
-    leaveType,
-
-    startDate,
-
-    endDate,
-
-    reason,
-
-    medicalProof
-
-  } = data;
+  const { employeeId, leaveType, startDate, endDate, reason, medicalProof } = data;
 
   // ===== validate =====
 
@@ -283,95 +269,340 @@ const getLeaveRequestsService = async () => {
   };
 };
 
-// const updateDepartmentService = async (id, data) => {
-//     const { name, status } = data;
+const updateLeaveRequestService = async (
+  id,
+  data
+) => {
 
-//     if (!name) {
-//       return {
-//         status: "ERROR",
-//         message:
-//           "Department name is required"
-//       };
-//     }
+  const {
+    employeeId,
+    leaveType,
+    startDate,
+    endDate,
+    reason,
+    medicalProof
+  } = data;
 
-//     const department = await Department.findById(id);
+  // ===== validate =====
 
-//     if (!department) {
-//       return {
-//         status: "ERROR",
-//         message:
-//           "Department not found"
-//       };
-//     }
+  if (
+    !employeeId ||
+    !leaveType ||
+    !startDate ||
+    !endDate
+  ) {
 
-//     const existingDepartment =
-//       await Department.findOne({
-//         name,
-//         _id: { $ne: id }
-//       });
+    return {
+      status: "ERROR",
+      message:
+        "Missing required fields"
+    };
+  }
 
-//     if (existingDepartment) {
-//       return {
-//         status: "ERROR",
-//         message:
-//           "Department already exists"
-//       };
-//     }
+  // ===== find request =====
 
-//     const updatedDepartment =
-//       await Department.findByIdAndUpdate(
-//         id,
-//         {
-//           name,
-//           status
-//         },
-//         {
-//           returnDocument: "after"
-//         }
-//       );
+  const leaveRequest =
+    await LeaveRequest.findById(id);
 
-//     return {
-//       status: "SUCCESS",
-//       data: updatedDepartment
-//     };
-//   };
+  if (!leaveRequest) {
 
-// const deleteDepartmentService = async (id) => {
-//     const department = await Department.findById(id);
+    return {
+      status: "ERROR",
+      message:
+        "Leave request not found"
+    };
+  }
 
-//     if (!department) {
-//       return {
-//         status: "ERROR",
-//         message:
-//           "Department not found"
-//       };
-//     }
+  // ===== employee =====
 
-//      const employeeExists =
-//       await Employee.findOne({
-//         department: id
-//       });
+  const employee =
+    await Employee.findById(
+      employeeId
+    );
 
-//     if (employeeExists) {
+  if (!employee) {
 
-//       return {
-//         status: "ERROR",
-//         message:
-//           "Can not delete department because employees still exist"
-//       };
-//     }
+    return {
+      status: "ERROR",
+      message:
+        "Employee not found"
+    };
+  }
 
-//     await Department.findByIdAndDelete(id);
+  // ===== date =====
 
-//     return {
-//       status: "SUCCESS",
-//       message: "Delete department success"
-//     };
-//   };
+  const start =
+    new Date(
+      startDate +
+      "T00:00:00"
+    );
+
+  const end =
+    new Date(
+      endDate +
+      "T00:00:00"
+    );
+
+  start.setHours(
+    0, 0, 0, 0
+  );
+
+  end.setHours(
+    0, 0, 0, 0
+  );
+
+  if (start > end) {
+
+    return {
+      status: "ERROR",
+      message:
+        "Start date must be before end date"
+    };
+  }
+
+  // ===== calculate total =====
+
+  let totalDays = 0;
+
+  const current =
+    new Date(start);
+
+  while (current <= end) {
+
+    const currentDate =
+      new Date(current);
+
+    currentDate.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    const isSunday =
+      currentDate.getDay() === 0;
+
+    const startOfDay =
+      new Date(currentDate);
+
+    startOfDay.setHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    const endOfDay =
+      new Date(currentDate);
+
+    endOfDay.setHours(
+      23,
+      59,
+      59,
+      999
+    );
+
+    const holiday =
+      await CompanyHoliday.findOne({
+
+        startDate: {
+          $lte: endOfDay
+        },
+
+        endDate: {
+          $gte: startOfDay
+        }
+
+      }).lean();
+
+    if (
+      !isSunday &&
+      !holiday
+    ) {
+
+      totalDays++;
+    }
+
+    current.setDate(
+      current.getDate() + 1
+    );
+  }
+
+  // ===== validate total =====
+
+  if (totalDays <= 0) {
+
+    return {
+      status: "ERROR",
+      message:
+        "Selected dates are all holidays or Sundays"
+    };
+  }
+
+  // ===== paid leave =====
+
+  const paidLeaveTypes = [
+
+    "ANNUAL",
+
+    "MARRIAGE",
+
+    "CHILD_MARRIAGE",
+
+    "FUNERAL",
+
+    "MILITARY_EXAM",
+
+    "WORK_ACCIDENT",
+
+    "FOREIGN_VISIT"
+  ];
+
+  const isPaidLeave =
+    paidLeaveTypes.includes(
+      leaveType
+    );
+
+  // ===== annual leave =====
+
+  if (
+    leaveType ===
+    "ANNUAL"
+  ) {
+
+    // hoàn phép cũ trước
+
+    if (
+      leaveRequest.leaveType ===
+      "ANNUAL"
+    ) {
+
+      employee.leaveBalance +=
+        leaveRequest.totalDays;
+    }
+
+    // check lại
+
+    if (
+      employee.leaveBalance <
+      totalDays
+    ) {
+
+      return {
+        status: "ERROR",
+        message:
+          "Not enough leave balance"
+      };
+    }
+
+    // trừ phép mới
+
+    employee.leaveBalance -=
+      totalDays;
+
+    await employee.save();
+  }
+
+  // ===== sick leave =====
+
+  if (
+    leaveType === "SICK"
+  ) {
+
+    // nếu update mà không upload mới
+    // thì giữ file cũ
+
+    if (
+      !medicalProof &&
+      !leaveRequest.medicalProof
+    ) {
+
+      return {
+        status: "ERROR",
+        message:
+          "Medical proof is required for sick leave"
+      };
+    }
+  }
+
+  // ===== update =====
+
+  leaveRequest.employeeId =
+    employeeId;
+
+  leaveRequest.employeeCode =
+    employee.code;
+
+  leaveRequest.employeeName =
+    employee.name;
+
+  leaveRequest.leaveType =
+    leaveType;
+
+  leaveRequest.startDate =
+    startDate;
+
+  leaveRequest.endDate =
+    endDate;
+
+  leaveRequest.totalDays =
+    totalDays;
+
+  leaveRequest.reason =
+    reason;
+
+  leaveRequest.isPaidLeave =
+    isPaidLeave;
+
+  // giữ file cũ nếu không upload mới
+
+  if (
+    leaveType === "SICK"
+  ) {
+
+    leaveRequest.medicalProof =
+      medicalProof ||
+
+      leaveRequest.medicalProof;
+
+  } else {
+
+    leaveRequest.medicalProof =
+      null;
+  }
+
+  await leaveRequest.save();
+
+  return {
+
+    status: "SUCCESS",
+
+    data: leaveRequest
+  };
+};
+
+const deleteLeaveRequestService = async (id) => {
+  console.log("Deleting leave request with ID:", id);
+    const leaveRequest = await LeaveRequest.findById(id);
+
+    if (!leaveRequest) {
+      return {
+        status: "ERROR",
+        message: "Leave request not found"
+      };
+    }
+
+    await LeaveRequest.findByIdAndDelete(id);
+
+    return {
+      status: "SUCCESS",
+      message: "Delete leave request success"
+    };
+  };
 
 module.exports = {
   createLeaveRequestService,
   getLeaveRequestsService,
-  // updateLeaveRequestService,
-  // deleteLeaveRequestService
+  updateLeaveRequestService,
+  deleteLeaveRequestService
 };

@@ -3,7 +3,16 @@ const LeaveService = require("../../services/Admin/LeaveSer");
 
 const createLeaveRequest = async (req, res) => {
   try {
-    const result = await LeaveService.createLeaveRequestService(req.body);
+    const result = await LeaveService.createLeaveRequestService({
+      ...req.body,
+       medicalProof:
+          req.file
+            ? {
+                fileName:
+                  req.file.filename
+              }
+            : null
+    });
 
     if (result.status === "ERROR") {
       return res.status(400).json(result);
@@ -38,51 +47,68 @@ const getLeaveRequests = async (req, res) => {
   }
 };
 
-// const updateLeaveRequest = async (req, res) => {
-//   try {
-//     const result =
-//       await LeaveService
-//         .updateLeaveRequestService(
-//           req.params.id,
-//           req.body
-//         );
-//     if (result.status === "ERROR") {
-//       return res.status(400).json(result);
-//     }
-//     return res.status(200).json(result);
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({
-//       status: "ERROR",
-//       message: "Server error"
-//     });
-//   }
-// };
+const updateLeaveRequest = async (req, res) => {
 
-// const deleteLeaveRequest = async (req, res) => {
-//   try {
-//     const result =
-//       await LeaveService
-//         .deleteLeaveRequestService(
-//           req.params.id
-//         );
-//     if (result.status === "ERROR") {
-//       return res.status(400).json(result);
-//     }
+    try {
 
-//     return res.status(200).json(result);
+      const result =
+        await LeaveService.updateLeaveRequestService(
 
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: "ERROR",
-//       message: "Server error"
-//     });
-//   }
-// };
+          req.params.id,
+
+          {
+            ...req.body,
+
+            medicalProof:
+              req.file
+                ? {
+                    fileName:
+                      req.file.filename
+                  }
+                : undefined
+          }
+        );
+
+      if (result.status === "ERROR") {
+        return res.status(400).json(result);
+      }
+
+      return res.status(200).json(result);
+
+    } catch (error) {
+
+      return res.status(500).json({
+        status: "ERROR",
+        message: error.message
+      });
+    }
+};
+
+const deleteLeaveRequest = async (req, res) => {
+  console.log("Received request to delete leave request with ID:", req.params.id);
+  try {
+    const result =
+      await LeaveService
+        .deleteLeaveRequestService(
+          req.params.id
+        );
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error"
+    });
+  }
+};
 
 module.exports = {
   createLeaveRequest,
   getLeaveRequests,
-  // updateLeaveRequest,
-  // deleteLeaveRequest
+  updateLeaveRequest,
+  deleteLeaveRequest
 };

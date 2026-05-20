@@ -76,6 +76,7 @@ function LeavePage() {
 
   const handleApprove = async (id) => {
       try {
+        console.log("Approving leave request:", id);
         await updateLeaveRequest(
           id,
           {
@@ -128,30 +129,36 @@ function LeavePage() {
 
   // ===== update =====
 
-  const handleUpdate = async (id, payload) => {
+  const handleUpdate = async (
+  id,
+  payload
+) => {
 
-      try {
+  try {
 
-        await updateLeaveRequest(
-          id,
-          payload
-        );
+    const res =
+      await updateLeaveRequest(
+        id,
+        payload
+      );
 
-        message.success(
-          "Updated successfully"
-        );
+    message.success(
+      res.message ||
+      "Updated successfully"
+    );
 
-        setOpenModal(false);
+    setOpenModal(false);
 
-        fetchLeaveRequests();
+    fetchLeaveRequests();
 
-      } catch {
+  } catch (error) {
 
-        message.error(
-          "Update failed"
-        );
-      }
-    };
+    message.error(
+      error.message ||
+      "Update failed"
+    );
+  }
+};
 
   // ===== delete =====
 

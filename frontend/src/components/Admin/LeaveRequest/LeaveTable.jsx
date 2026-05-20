@@ -6,34 +6,25 @@ import {
   Image,
   Popover
 } from "antd";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function LeaveTable({
-
   filteredData,
-
   handleOpenDetail,
-
   handleApprove,
-
   handleReject
-
 }) {
 
   // ===== color =====
 
-  const typeColor =
-    (type) => {
-
+  const typeColor = (type) => {
       switch (type) {
-
         case "SICK":
         case "PERSONAL":
         case "MATERNITY":
           return "red";
-
         default:
           return "blue";
-
       }
     };
 
@@ -126,14 +117,10 @@ function LeaveTable({
   // ===== medical proof column =====
 
   const medicalProofColumn = {
-
-    title:
-      "Medical Proof",
-
+    title: "Medical Proof",
     width: 180,
 
     render: (_, r) => {
-
       if (
         r.leaveType !== "SICK"
       ) {
@@ -159,17 +146,14 @@ function LeaveTable({
           content={
 
             <Image
-
               src={
-                r.medicalProof
-                  ?.fileUrl
+                `${API_URL}/uploads/${r.medicalProof?.fileName}`
               }
-
               width={220}
             />
+            
           }
         >
-
           <Tag color="green">
             View
           </Tag>
@@ -182,12 +166,9 @@ function LeaveTable({
   // ===== action columns =====
 
   const actionColumns = [
-
     {
       title: "Status",
-
       width: 140,
-
       render: (_, r) => (
 
         <Tag>

@@ -20,65 +20,74 @@ export const getLeaveRequest = async () => {
 
 // ===== CREATE =====
 
-export const addLeaveRequest =
-  async (data) => {
-
+export const addLeaveRequest = async (data) => {
     const accessToken =
-      localStorage.getItem(
-        "accessToken"
-      );
+    localStorage.getItem(
+      "accessToken"
+    );
 
-    const res =
-      await axios.post(
+  const res =
+    await axios.post(
 
-        `${API_URL}/api/client/leaverequests`,
+      `${API_URL}/api/admin/leaverequest`,
 
-        data,
+      data,
 
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`
-          }
+      {
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
+
+          "Content-Type":
+            "multipart/form-data"
         }
-      );
+      }
+    );
 
-    return res.data;
+  return res.data;
 };
 
 // ===== UPDATE =====
 
-export const updateLeaveRequest =
-  async (id, data) => {
+export const updateLeaveRequest = async (id, data) => {
 
     const accessToken =
       localStorage.getItem(
         "accessToken"
       );
 
-    const res =
-      await axios.put(
+    try {
 
-        `${API_URL}/api/client/leaverequests/${id}`,
-
-        data,
-
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`
+      const res =
+        await axios.put(
+          `${API_URL}/api/admin/leaverequest/${id}`,
+          data,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${accessToken}`
+            }
           }
-        }
-      );
+        );
 
-    return res.data;
+      return res.data;
+
+    } catch (error) {
+      throw new Error(
+
+        error.response
+          ?.data
+          ?.message ||
+
+        "Update failed"
+      );
+    }
 };
 
 // ===== DELETE =====
 
-export const deleteLeaveRequest =
-  async (id) => {
-
+export const deleteLeaveRequest = async (id) => {
+    console.log("Deleting leave request with ID:", id);
     const accessToken =
       localStorage.getItem(
         "accessToken"
@@ -87,7 +96,7 @@ export const deleteLeaveRequest =
     const res =
       await axios.delete(
 
-        `${API_URL}/api/client/leaverequests/${id}`,
+        `${API_URL}/api/admin/leaverequest/${id}`,
 
         {
           headers: {

@@ -4,6 +4,9 @@ const router = express.Router();
 const EmployeeContr = require("../controllers/Admin/EmployeeContr");
 const DepartmentContr = require("../controllers/Admin/DepartmentContr");
 const HolidayContr = require("../controllers/Admin/Holiday");
+const LeaveContr = require("../controllers/Admin/LeaveContr");
+
+const upload = require("../middleware/upload");
 
 const { authMiddleware, authUserMiddleware } = require("../middleware/Middleware");
 
@@ -24,5 +27,10 @@ router.post("/holiday", authMiddleware, HolidayContr.createHoliday);
 router.get("/holiday", authMiddleware, HolidayContr.getAllHolidays);
 router.put("/holiday/:id", authMiddleware, HolidayContr.updateHoliday);
 router.delete("/holiday/:id", authMiddleware, HolidayContr.deleteHoliday);
+
+router.post("/leaverequest", authMiddleware, upload.single("medicalProof"), LeaveContr.createLeaveRequest);
+router.put("/leaverequest/:id", authMiddleware, upload.single("medicalProof"), LeaveContr.updateLeaveRequest);
+router.get("/leaverequests", authMiddleware, LeaveContr.getLeaveRequests);
+router.delete("/leaverequest/:id", authMiddleware, LeaveContr.deleteLeaveRequest);
 
 module.exports = router;

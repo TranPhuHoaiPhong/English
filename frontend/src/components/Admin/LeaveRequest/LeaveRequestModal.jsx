@@ -13,9 +13,17 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
 
   useEffect(() => {
     if (leaveRequest) {
+
       form.setFieldsValue({
-        employeeId: leaveRequest?.employeeId?._id,
-        leaveType: leaveRequest?.leaveType,
+
+        employeeId:
+          leaveRequest
+            ?.employeeId,
+
+        leaveType:
+          leaveRequest
+            ?.leaveType,
+
         dates: [
           dayjs(
             leaveRequest
@@ -26,12 +34,45 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
               ?.endDate
           )
         ],
-        reason: leaveRequest?.reason,
-        medicalProof: leaveRequest?.medicalProof
+
+        reason:
+          leaveRequest?.reason,
+
+        medicalProof:
+          leaveRequest?.medicalProof
+
+            ? [
+                {
+                  uid: "-1",
+
+                  name:
+                    leaveRequest
+                      .medicalProof
+                      .fileName,
+
+                  status:
+                    "done",
+
+                  url:
+                    `${
+                      import.meta.env
+                        .VITE_BACKEND_URL
+                    }/uploads/${
+                      leaveRequest
+                        .medicalProof
+                        .fileName
+                    }`
+                }
+              ]
+
+            : []
       });
+
     } else {
+
       form.resetFields();
     }
+
   }, [
     leaveRequest,
     form
@@ -41,49 +82,59 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
 
   const handleSubmit = async () => {
       const values = await form.validateFields();
-      const payload = {
-        employeeId: values.employeeId,
-        leaveType: values.leaveType,
-        startDate:
-          values.dates[0]
-            .format(
-              "YYYY-MM-DD"
-            ),
-        endDate:
-          values.dates[1]
-            .format(
-              "YYYY-MM-DD"
-            ),
-        reason: values.reason,
-        medicalProof:
-          values.leaveType ===
-          "SICK"
-            ? {
-                fileName:
-                  values
-                    ?.medicalProof
-                    ?.file
-                    ?.name ||
-                  "",
-                fileUrl:
-                  values
-                    ?.medicalProof
-                    ?.file
-                    ?.thumbUrl ||
-                  "",
-                uploadedAt:
-                  new Date()
-              }
-            : null
-      };
+      const formData = new FormData();
+
+      formData.append(
+        "employeeId",
+        values.employeeId
+      );
+
+      formData.append(
+        "leaveType",
+        values.leaveType
+      );
+
+      formData.append(
+        "startDate",
+        values.dates[0].format(
+          "YYYY-MM-DD"
+        )
+      );
+
+      formData.append(
+        "endDate",
+        values.dates[1].format(
+          "YYYY-MM-DD"
+        )
+      );
+
+      formData.append(
+        "reason",
+        values.reason || ""
+      );
+
+      // ===== upload file =====
+
+      if (
+        values.leaveType === "SICK" &&
+        values.medicalProof?.length > 0
+      ) {
+        formData.append(
+          "medicalProof",
+          values.medicalProof[0]
+            .originFileObj
+        );
+      }
 
       if (isEdit) {
+
         handleUpdate(
           leaveRequest._id,
-          payload
+          formData
         );
+
       } else {
-        handleAdd(payload);
+        handleAdd(formData);
       }
     };
 
@@ -116,12 +167,20 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
           ]}
         >
           <Select
+            labelInValue
+            disabled={isEdit}
             placeholder="Select employee"
-            style={{width: "100%"}}
+            style={{ width: "100%" }}
             popupMatchSelectWidth
             options={employees.map((employee) => ({
               value: employee._id,
-              label: (
+              label: employee.code,
+              employee
+            }))}
+            optionRender={(option) => {
+              const employee = option.data.employee;
+
+              return (
                 <div
                   style={{
                     display: "grid",
@@ -139,9 +198,11 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
                   >
                     {employee.code}
                   </div>
+
                   <div>
                     {employee.name}
                   </div>
+
                   <div
                     style={{
                       color: "#888"
@@ -151,18 +212,21 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
                       "No Department"}
                   </div>
                 </div>
-              )
-            }))}
-            dropdownRender={(menu) => (
+              );
+            }}
+
+            popupRender={(menu) => (
               <div>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "90px 180px 1fr",
+                    gridTemplateColumns:
+                      "90px 180px 1fr",
                     gap: 12,
                     padding: "8px 12px",
                     fontWeight: 700,
-                    borderBottom: "1px solid #f0f0f0",
+                    borderBottom:
+                      "1px solid #f0f0f0",
                     background: "#fafafa"
                   }}
                 >
@@ -170,14 +234,23 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
                   <div>Name</div>
                   <div>Department</div>
                 </div>
+
                 {menu}
               </div>
             )}
+
           />
         </Form.Item>
+
         <Form.Item
           label="Leave Type"
           name="leaveType"
+          rules={[
+            {
+              required: true,
+              message: "Please select leave type"
+            }
+          ]}
         >
           <Select>
             <Select.Option value="ANNUAL">
@@ -221,9 +294,16 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
             </Select.Option>
             </Select>
         </Form.Item>
+
         <Form.Item
           label="Date Range"
           name="dates"
+          rules={[
+            {
+              required: true,
+              message: "Please select date range"
+            }
+          ]}
         >
           <RangePicker
             style={{
@@ -235,6 +315,12 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
         <Form.Item
           label="Reason"
           name="reason"
+          rules={[
+            {
+              required: true,
+              message: "Please select reason"
+            }
+          ]}
         >
           <Input.TextArea
             rows={4}
@@ -262,10 +348,19 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
 
             return (
               <Form.Item
-                label=
-                  "Medical Proof"
-                name=
-                  "medicalProof"
+                label="Medical Proof"
+                name="medicalProof"
+                valuePropName="fileList"
+                getValueFromEvent={(e) =>
+                  e?.fileList
+                }
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      "Please upload medical proof",
+                  },
+                ]}
               >
                 <Upload
                   listType=
@@ -288,6 +383,7 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
           }}
         </Form.Item>
       </Form>
+      
       {
         isEdit && (
           <Space>

@@ -30,6 +30,10 @@ app.use(
   express.static(path.join(__dirname, "src/assets/images/avatar"))
 );
 app.use("/images", express.static(path.join(__dirname, "src/assets/images")));
+app.use(
+  "/uploads",
+  express.static("uploads")
+);
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, "0.0.0.0", () => {
