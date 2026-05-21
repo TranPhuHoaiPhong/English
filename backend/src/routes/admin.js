@@ -11,6 +11,7 @@ const upload = require("../middleware/upload");
 const { authMiddleware, authUserMiddleware } = require("../middleware/Middleware");
 
 router.post("/sign-in", EmployeeContr.loginEmployee);
+router.post("/sign-out", authMiddleware, EmployeeContr.logoutEmployee);
 
 router.post("/employees", authMiddleware, EmployeeContr.createEmployee);
 router.get("/employees", authMiddleware, EmployeeContr.getEmployees);
@@ -32,5 +33,9 @@ router.post("/leaverequest", authMiddleware, upload.single("medicalProof"), Leav
 router.put("/leaverequest/:id", authMiddleware, upload.single("medicalProof"), LeaveContr.updateLeaveRequest);
 router.get("/leaverequests", authMiddleware, LeaveContr.getLeaveRequests);
 router.delete("/leaverequest/:id", authMiddleware, LeaveContr.deleteLeaveRequest);
+router.put("/leaverequest/:id/approve", authMiddleware, LeaveContr.approveLeaveRequest);
+router.put("/leaverequest/:id/reject", authMiddleware, LeaveContr.rejectLeaveRequest);
+router.get("/history/leaverequests", authMiddleware, LeaveContr.getHistoryLeaveRequests);
+
 
 module.exports = router;

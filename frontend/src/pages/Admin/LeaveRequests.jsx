@@ -5,7 +5,7 @@ import removeVietnameseTones from "../../utils/removeVietnameseTones";
 import LeaveFilter from "../../components/Admin/LeaveRequest/LeaveFilter";
 import LeaveTable from "../../components/Admin/LeaveRequest/LeaveTable";
 import LeaveRequestModal from "../../components/Admin/LeaveRequest/LeaveRequestModal";
-import { getLeaveRequest, addLeaveRequest, updateLeaveRequest, deleteLeaveRequest } from "../../services/Admin/LeaveRequest/LeaveRequests";
+import { getLeaveRequest, addLeaveRequest, updateLeaveRequest, deleteLeaveRequest, ApproveLeaveRequest, RejectLeaveRequest } from "../../services/Admin/LeaveRequest/LeaveRequests";
 import { getAllEmployees } from "../../services/Admin/Employee/employeeService";
 
 function LeavePage() {
@@ -77,13 +77,7 @@ function LeavePage() {
   const handleApprove = async (id) => {
       try {
         console.log("Approving leave request:", id);
-        await updateLeaveRequest(
-          id,
-          {
-            status:
-              "APPROVED"
-          }
-        );
+        await ApproveLeaveRequest(id);
 
         message.success(
           "Approved successfully"
@@ -105,7 +99,7 @@ function LeavePage() {
 
       try {
 
-        await updateLeaveRequest(
+        await RejectLeaveRequest(
           id,
           {
             status:

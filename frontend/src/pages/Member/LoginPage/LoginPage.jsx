@@ -22,10 +22,10 @@ function LoginPage() {
   const onSubmit = async () => {
     setLoading(true);
     const role = await handleLogin();
-
+ 
     setLoading(false);
     
-    if (role === "employee" || role === "manager") {
+    if (role === "member") {
       navigate("/home");
     }
     else if (role === "admin") {

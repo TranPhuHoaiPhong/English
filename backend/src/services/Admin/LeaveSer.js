@@ -262,11 +262,37 @@ const end =
 };
 
 const getLeaveRequestsService = async () => {
-  const leaverequests = await LeaveRequest.find();
+  const leaverequests = await LeaveRequest
+    .find({
+      status: "PENDING"
+    })
+    .sort({
+      createdAt: -1
+    });
+
   return {
     status: "SUCCESS",
     data: leaverequests
   };
+};
+
+const getHistoryLeaveRequestsService = async () => {
+
+    const leaverequests =
+      await LeaveRequest.find({
+        status: {
+          $in: [
+            "APPROVED",
+            "REJECTED",
+            "CANCELLED"
+          ]
+        }
+      });
+
+    return {
+      status: "SUCCESS",
+      data: leaverequests
+    };
 };
 
 const updateLeaveRequestService = async (
@@ -582,7 +608,6 @@ const updateLeaveRequestService = async (
 };
 
 const deleteLeaveRequestService = async (id) => {
-  console.log("Deleting leave request with ID:", id);
     const leaveRequest = await LeaveRequest.findById(id);
 
     if (!leaveRequest) {
@@ -598,11 +623,53 @@ const deleteLeaveRequestService = async (id) => {
       status: "SUCCESS",
       message: "Delete leave request success"
     };
-  };
+};
+
+const approveLeaveRequestService = async (id) => {
+    const leaveRequest = await LeaveRequest.findById(id);
+
+    if (!leaveRequest) {
+      return {
+        status: "ERROR",
+        message: "Leave request not found"
+      };
+    }
+
+    leaveRequest.status = "APPROVED";
+    await leaveRequest.save();
+
+    return {    
+      status: "SUCCESS",
+      message: "Leave request approved"
+    };
+}
+
+const rejectLeaveRequestService = async (id) => {
+    const leaveRequest = await LeaveRequest.findById(id);
+
+    if (!leaveRequest) {
+      return {
+        status: "ERROR",
+        message: "Leave request not found"
+      };
+    }
+
+    leaveRequest.status = "REJECTED";
+    await leaveRequest.save();
+
+    return {
+      status: "SUCCESS",
+      message: "Leave request rejected"
+    };
+}
+
 
 module.exports = {
   createLeaveRequestService,
   getLeaveRequestsService,
   updateLeaveRequestService,
-  deleteLeaveRequestService
+  deleteLeaveRequestService,
+  approveLeaveRequestService,
+  rejectLeaveRequestService,
+  getHistoryLeaveRequestsService
 };

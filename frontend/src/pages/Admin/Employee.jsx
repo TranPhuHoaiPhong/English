@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { Form, message } from "antd";
-
-import {
-  departmentsData
-} from "../../services/Admin/Employee/employeeData";
 import { getDepartments } from "../../services/Admin/Department/departmentService";
-
-
 import removeVietnameseTones from "../../utils/removeVietnameseTones";
 
 import EmployeeFilter from "../../components/Admin/Employee/EmployeeFilter";

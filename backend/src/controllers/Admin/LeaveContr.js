@@ -47,6 +47,24 @@ const getLeaveRequests = async (req, res) => {
   }
 };
 
+const getHistoryLeaveRequests = async (req, res) => {
+  try {
+    const result =  await LeaveService.getHistoryLeaveRequestsService();
+
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error"
+    });
+  }
+};
+
 const updateLeaveRequest = async (req, res) => {
 
     try {
@@ -85,7 +103,6 @@ const updateLeaveRequest = async (req, res) => {
 };
 
 const deleteLeaveRequest = async (req, res) => {
-  console.log("Received request to delete leave request with ID:", req.params.id);
   try {
     const result =
       await LeaveService
@@ -106,9 +123,52 @@ const deleteLeaveRequest = async (req, res) => {
   }
 };
 
+const approveLeaveRequest = async (req, res) => {
+  try {
+    const result =
+      await LeaveService.approveLeaveRequestService(
+        req.params.id
+      );
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error"
+    });
+  }
+};
+
+const rejectLeaveRequest = async (req, res) => {
+  try {
+    const result =
+      await LeaveService.rejectLeaveRequestService(
+        req.params.id
+      );
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error"
+    });
+  }
+};
+
+
+
 module.exports = {
   createLeaveRequest,
   getLeaveRequests,
   updateLeaveRequest,
-  deleteLeaveRequest
+  deleteLeaveRequest,
+  approveLeaveRequest,
+  rejectLeaveRequest,
+  getHistoryLeaveRequests
 };

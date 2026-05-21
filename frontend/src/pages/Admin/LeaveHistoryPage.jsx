@@ -7,170 +7,448 @@ import {
   Popover,
   Image
 } from "antd";
-import { useState } from "react";
-
-// import { leaveRequestsData } from "../../services/Admin/LeaveRequests";
+import { useEffect, useState } from "react";
+import { getHistoryLeaveRequest } from "../../services/Admin/HistoryRequest/HistoryRequest";
 
 const { Option } = Select;
 
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 function LeaveHistoryPage() {
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [typeFilter, setTypeFilter] = useState("ALL");
-  const [searchText, setSearchText] = useState("");
+  const [data, setData] = useState([]);
+  const [
+    statusFilter,
+    setStatusFilter
+  ] = useState("ALL");
 
-  const filteredData = leaveRequestsData.filter((item) => {
-    const matchStatus =
-      statusFilter === "ALL" || item.status === statusFilter;
+  const [
+    typeFilter,
+    setTypeFilter
+  ] = useState("ALL");
 
-    const matchType =
-      typeFilter === "ALL" || item.leaveType === typeFilter;
+  const [
+    searchText,
+    setSearchText
+  ] = useState("");
 
-    const matchSearch = item.employee.name
-      .toLowerCase()
-      .includes(searchText.toLowerCase());
 
-    return matchStatus && matchType && matchSearch;
-  });
-
-  const typeColor = (type) => {
-    switch (type) {
-      case "SICK":
-        return "red";
-      case "ANNUAL":
-        return "blue";
-      case "UNPAID":
-        return "orange";
-      default:
-        return "purple";
+  const fetchLeaveRequests = async () => {
+    try {
+      const result = await getHistoryLeaveRequest();
+      setData( result.data || [] );
+    } catch {
+      message.error("Failed to fetch leave requests");
     }
   };
 
-  const statusColor = {
-    PENDING: "gold",
-    APPROVED: "green",
-    REJECTED: "red"
+    useEffect(() => {
+    fetchLeaveRequests();
+  }, []);
+
+  // ===== remove vietnamese =====
+
+  const removeVietnameseTones = (
+    str
+  ) => {
+
+    return str
+      .normalize("NFD")
+      .replace(
+        /[\u0300-\u036f]/g,
+        ""
+      )
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D");
   };
 
-  // 🎯 render proof
-  const renderProofStatus = (r) => {
-    if (r.leaveType !== "SICK") return "-";
+  // ===== filter =====
 
-    // ✅ có proof và đã submit → hover xem
-    if (r.proofStatus === "SUBMITTED" && r.medicalProof) {
+  const filteredData = data.filter((item) => {
+
+      const matchType =
+        typeFilter === "ALL"
+        ||
+        item.leaveType ===
+          typeFilter;
+
+      const matchStatus =
+        statusFilter ===
+          "ALL"
+        ||
+        item.status ===
+          statusFilter;
+
+      const keyword =
+        removeVietnameseTones(
+          searchText.toLowerCase()
+        );
+
+      const matchSearch =
+        removeVietnameseTones(
+          (
+            item.employeeName ||
+            ""
+          ).toLowerCase()
+        ).includes(keyword)
+        ||
+        removeVietnameseTones(
+          (
+            item.employeeCode ||
+            ""
+          ).toLowerCase()
+        ).includes(keyword);
+
       return (
+        matchType &&
+        matchStatus &&
+        matchSearch
+      );
+    });
+
+  // ===== type color =====
+
+  const typeColor = (
+    type
+  ) => {
+
+    switch (type) {
+
+      case "SICK":
+        return "red";
+
+      case "PERSONAL":
+        return "orange";
+
+      case "MATERNITY":
+        return "purple";
+
+      default:
+        return "blue";
+    }
+  };
+
+  // ===== status color =====
+
+  const statusColor = (
+    status
+  ) => {
+
+    switch (status) {
+
+      case "PENDING":
+        return "gold";
+
+      case "APPROVED":
+        return "green";
+
+      case "REJECTED":
+        return "red";
+
+      case "CANCELLED":
+        return "default";
+
+      default:
+        return "blue";
+    }
+  };
+
+  // ===== medical proof =====
+
+  const renderMedicalProof = (r) => {
+
+      if (
+        r.leaveType !==
+        "SICK"
+      ) {
+
+        return "-";
+      }
+
+      if (
+        !r.medicalProof
+      ) {
+
+        return (
+          <Tag color="red">
+            Missing
+          </Tag>
+        );
+      }
+
+      return (
+
         <Popover
           content={
+
             <Image
-              src={r.medicalProof}
-              width={200}
+              src={
+                `${API_URL}/uploads/${r.medicalProof?.fileName}`
+              }
+              width={220}
             />
           }
         >
-          <Tag color="blue">Submitted</Tag>
+          <Tag color="green">
+            View
+          </Tag>
+
         </Popover>
       );
-    }
+    };
 
-    // 🟠 đang nộp
-    if (r.proofStatus === "SUBMITTING") {
-      return <Tag color="orange">Submitting</Tag>;
-    }
-
-    // 🟢 đã duyệt proof
-    if (r.proofStatus === "APPROVED") {
-      return <Tag color="green">Approved</Tag>;
-    }
-
-    // 🔴 bị từ chối proof
-    if (r.proofStatus === "REJECTED") {
-      return <Tag color="red">Rejected</Tag>;
-    }
-
-    return <Tag>None</Tag>;
-  };
+  // ===== columns =====
 
   const columns = [
-    {
-      title: "Name",
-      render: (_, r) => r.employee.name
-    },
-    {
-      title: "Department",
-      render: (_, r) => r.employee.department
-    },
-    {
-      title: "Type",
-      render: (_, r) => (
-        <Tag color={typeColor(r.leaveType)}>
-          {r.leaveType}
-        </Tag>
-      )
-    },
-    {
-      title: "Date",
-      render: (_, r) =>
-        `${r.startDate} → ${r.endDate}`
-    },
-    {
-      title: "Reason",
-      dataIndex: "reason"
-    },
-    {
-      title: "Status",
-      render: (_, r) => (
-        <Tag color={statusColor[r.status]}>
-          {r.status}
-        </Tag>
-      )
-    },
-    {
-      title: "Proof Status",
-      render: (_, r) => renderProofStatus(r)
-    }
-  ];
+
+  {
+    title: "Code",
+    width: 120,
+    render: (_, r) =>
+      r.employeeCode
+  },
+
+  {
+    title: "Name",
+    width: 180,
+    ellipsis: true,
+    render: (_, r) =>
+      r.employeeName
+  },
+
+  {
+    title: "Type",
+    width: 130,
+    render: (_, r) => (
+
+      <Tag
+        color={
+          typeColor(
+            r.leaveType
+          )
+        }
+      >
+        {r.leaveType}
+      </Tag>
+    )
+  },
+
+  {
+    title: "Date",
+    width: 240,
+    render: (_, r) =>
+
+      `${new Date(
+        r.startDate
+      ).toLocaleDateString()}
+       →
+       ${new Date(
+        r.endDate
+      ).toLocaleDateString()}`
+  },
+
+  {
+    title: "Days",
+    dataIndex:
+      "totalDays",
+    width: 100
+  },
+
+  {
+    title: "Reason",
+    dataIndex:
+      "reason",
+    width: 250,
+    ellipsis: true
+  },
+
+  // ===== only show when filter is SICK or ALL =====
+
+  ...(typeFilter === "SICK" ||
+  typeFilter === "ALL"
+
+    ? [
+
+        {
+          title:
+            "Medical Proof",
+
+          width: 180,
+
+          render: (_, r) =>
+            renderMedicalProof(
+              r
+            )
+        }
+
+      ]
+
+    : []),
+
+  {
+    title: "Status",
+    width: 140,
+    render: (_, r) => (
+
+      <Tag
+        color={
+          statusColor(
+            r.status
+          )
+        }
+      >
+        {r.status}
+      </Tag>
+    )
+  },
+
+  {
+    title: "Created At",
+
+    width: 180,
+
+    render: (_, r) =>
+
+      new Date(
+        r.createdAt
+      ).toLocaleString()
+  }
+];
 
   return (
-    <>
+
+    <div>
+
       {/* FILTER */}
-      <Space style={{ marginBottom: 16 }}>
+
+      <Space
+        style={{
+          marginBottom: 16
+        }}
+        wrap
+      >
+
         <Select
           value={statusFilter}
-          onChange={setStatusFilter}
-          style={{ width: 150 }}
+          onChange={
+            setStatusFilter
+          }
+          style={{
+            width: 180
+          }}
         >
-          <Option value="ALL">All Status</Option>
-          <Option value="PENDING">Pending</Option>
-          <Option value="APPROVED">Approved</Option>
-          <Option value="REJECTED">Rejected</Option>
+          <Option value="ALL">
+            All Status
+          </Option>
+
+          <Option value="APPROVED">
+            Approved
+          </Option>
+
+          <Option value="REJECTED">
+            Rejected
+          </Option>
+
+          <Option value="CANCELLED">
+            Cancelled
+          </Option>
+
         </Select>
 
         <Select
           value={typeFilter}
-          onChange={setTypeFilter}
-          style={{ width: 150 }}
+          onChange={
+            setTypeFilter
+          }
+          style={{
+            width: 180
+          }}
         >
-          <Option value="ALL">All Type</Option>
-          <Option value="SICK">Sick</Option>
-          <Option value="ANNUAL">Annual</Option>
-          <Option value="UNPAID">Unpaid</Option>
-          <Option value="OTHER">Other</Option>
+          <Option value="ALL">
+            All Leave Types
+          </Option>
+
+          <Option value="ANNUAL">
+            Annual Leave
+          </Option>
+
+          <Option value="SICK">
+            Sick Leave
+          </Option>
+
+          <Option value="MARRIAGE">
+            Marriage Leave
+          </Option>
+
+          <Option value="CHILD_MARRIAGE">
+            Child Marriage Leave
+          </Option>
+
+          <Option value="FUNERAL">
+            Funeral Leave
+          </Option>
+
+          <Option value="MILITARY_EXAM">
+            Military Exam Leave
+          </Option>
+
+          <Option value="WORK_ACCIDENT">
+            Work Accident Leave
+          </Option>
+
+          <Option value="FOREIGN_VISIT">
+            Foreign Visit Leave
+          </Option>
+
+          <Option value="MATERNITY">
+            Maternity Leave
+          </Option>
+
+          <Option value="PERSONAL">
+            Personal Leave
+          </Option>
+
         </Select>
 
         <Input
-          placeholder="Search name..."
+          placeholder="Search employee..."
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 250 }}
+          onChange={(e) =>
+            setSearchText(
+              e.target.value
+            )
+          }
+          style={{
+            width: 250
+          }}
         />
+
       </Space>
 
       {/* TABLE */}
+
       <Table
+
+        rowKey="_id"
+
         columns={columns}
-        dataSource={filteredData}
-        rowKey="key"
+
+        dataSource={
+          filteredData
+        }
+
+        pagination={{
+          pageSize: 10
+        }}
+
+        tableLayout="fixed"
+
+        scroll={{
+          x: 1500,
+          y: 650
+        }}
       />
-    </>
+
+    </div>
   );
 }
 

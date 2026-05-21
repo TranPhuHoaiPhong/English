@@ -87,7 +87,6 @@ export const updateLeaveRequest = async (id, data) => {
 // ===== DELETE =====
 
 export const deleteLeaveRequest = async (id) => {
-    console.log("Deleting leave request with ID:", id);
     const accessToken =
       localStorage.getItem(
         "accessToken"
@@ -106,5 +105,49 @@ export const deleteLeaveRequest = async (id) => {
         }
       );
 
+    return res.data;
+};
+
+// ===== APPROVE =====
+export const ApproveLeaveRequest = async (id) => {
+    const accessToken =
+      localStorage.getItem(
+        "accessToken"
+      );
+    const res =
+      await axios.put(   
+        `${API_URL}/api/admin/leaverequest/${id}/approve`,
+        {
+          status: "APPROVED"
+        },
+        {
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`
+          }
+        }
+      );    
+    return res.data;
+};
+
+// ===== REJECT ===== 
+export const RejectLeaveRequest = async (id) => {
+    const accessToken =
+      localStorage.getItem(
+        "accessToken"
+      );
+    const res =
+      await axios.put(
+        `${API_URL}/api/admin/leaverequest/${id}/reject`,
+        {
+          status: "REJECTED"
+        },
+        {
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`
+          }
+        }
+      );    
     return res.data;
 };

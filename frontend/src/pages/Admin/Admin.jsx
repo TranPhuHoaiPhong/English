@@ -3,21 +3,49 @@ import {
   Col,
   Card,
   Statistic,
-  message
+  message,
+  Image,
+  Upload,
+  Button
 } from "antd";
 
 import {
+  UploadOutlined,
   TeamOutlined,
   CalendarOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined
+  CheckCircleOutlined
 } from "@ant-design/icons";
 
-import { useState, useEffect } from "react";
+import {
+  useNavigate
+} from "react-router-dom";
 
-import DepartmentModal from "../../components/Admin/Department/DepartmentModal";
-import HolidayModal from "../../components/Admin/Holiday/HolidayModal";
-import { getDepartments } from "../../services/Admin/Department/departmentService";
+import {
+  useState,
+  useEffect
+} from "react";
+
+import DepartmentModal
+from "../../components/Admin/Department/DepartmentModal";
+
+import HolidayModal
+from "../../components/Admin/Holiday/HolidayModal";
+
+import {
+  getDepartments
+}
+from "../../services/Admin/Department/departmentService";
+
+import {
+  getAllEmployees
+}
+from "../../services/Admin/Employee/employeeService";
+
+import {
+  getLeaveRequest
+}
+from "../../services/Admin/LeaveRequest/LeaveRequests";
+
 import {
   getHolidays,
   createHoliday,
@@ -28,150 +56,509 @@ from "../../services/Admin/Holiday/Holiday";
 
 function AdminDashboard() {
 
-  const [openDepartmentModal, setOpenDepartmentModal] = useState(false);
-  const [departments, setDepartments] = useState([]);
+  const [
+    openDepartmentModal,
+    setOpenDepartmentModal
+  ] = useState(false);
 
-  const [openHolidayModal, setOpenHolidayModal] = useState(false);
-  const [holidays, setHolidays] = useState([]);
+  const [
+    departments,
+    setDepartments
+  ] = useState([]);
 
-  const fetchDepartments = async () => {
+  const [
+    openHolidayModal,
+    setOpenHolidayModal
+  ] = useState(false);
+
+  const [
+    holidays,
+    setHolidays
+  ] = useState([]);
+
+  const [
+    employees,
+    setEmployees
+  ] = useState(0);
+
+  const [
+    leaveRequests,
+    setLeaveRequests
+  ] = useState(0);
+
+  const [
+    imageUrl,
+    setImageUrl
+  ] = useState(
+    "http://localhost:5000/uploads/1779290020594-700869217.jpg"
+  );
+
+  const navigate =
+    useNavigate();
+
+  // ===== upload image =====
+
+  const handleUpload = (
+    info
+  ) => {
+
+    const file =
+      info.file.originFileObj;
+
+    if (!file) return;
+
+    const localUrl =
+      URL.createObjectURL(
+        file
+      );
+
+    setImageUrl(localUrl);
+
+    message.success(
+      "Image updated"
+    );
+  };
+
+  // ===== fetch departments =====
+
+  const fetchDepartments =
+    async () => {
+
     try {
-      const data = await getDepartments();
+
+      const data =
+        await getDepartments();
+
       setDepartments(data);
+
     } catch (error) {
+
       message.error(
         "Failed to fetch departments"
       );
     }
   };
 
-  const fetchHolidays = async () => {
+  // ===== fetch holidays =====
+
+  const fetchHolidays =
+    async () => {
+
     try {
-      const holiday = await getHolidays();
+
+      const holiday =
+        await getHolidays();
+
       setHolidays(holiday);
+
     } catch (error) {
+
       message.error(
         "Failed to fetch holidays"
       );
     }
   };
 
+  // ===== fetch employees =====
+
+  const fetchEmployees =
+    async () => {
+
+    try {
+
+      const data =
+        await getAllEmployees();
+
+      setEmployees(
+        data.length
+      );
+
+    } catch (error) {
+
+      message.error(
+        "Failed to fetch employees"
+      );
+    }
+  };
+
+  // ===== fetch leave requests =====
+
+  const fetchLeaveRequests =
+    async () => {
+
+    try {
+
+      const data =
+        await getLeaveRequest();
+
+      setLeaveRequests(
+        data.data.length
+      );
+
+    } catch (error) {
+
+      message.error(
+        "Failed to fetch leave requests"
+      );
+    }
+  };
+
   useEffect(() => {
+
     fetchDepartments();
+
     fetchHolidays();
+
+    fetchEmployees();
+
+    fetchLeaveRequests();
+
   }, []);
 
   return (
+
     <>
 
-      <Row
-        gutter={[16, 16]}
-        style={{ margin: 0 }}
+      <div
+        style={{
+          padding: 10
+        }}
       >
 
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Employees"
-              value={120}
-              prefix={<TeamOutlined />}
-            />
-          </Card>
-        </Col>
+        {/* STATISTIC CARDS */}
 
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Total Requests"
-              value={80}
-              prefix={<CalendarOutlined />}
-            />
-          </Card>
-        </Col>
+        <Row
+          gutter={[20, 20]}
+        >
 
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <Card
-            hoverable
-            onClick={() =>
-              setOpenDepartmentModal(true)
-            }
-            style={{
-              cursor: "pointer"
-            }}
-          >
-            <Statistic
-              title="Department"
-              value={3}
-              prefix={
-                <CheckCircleOutlined />
-              }
-            />
-          </Card>
-        </Col>
+          {/* EMPLOYEES */}
 
-        {/* <Col xs={24} sm={12} md={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Pending"
-              value={20}
-              prefix={
-                <ClockCircleOutlined />
-              }
-            />
-          </Card>
-        </Col> */}
-
-        <Col xs={24} sm={12} md={12} lg={6}>
-          <Card
-            hoverable
-            onClick={() =>
-              setOpenHolidayModal(
-                true
-              )
-            }
-            style={{
-              cursor: "pointer"
-            }}
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={6}
           >
 
-            <Statistic
-              title="Holidays"
-              value={holidays.length}
-              prefix={
-                <CalendarOutlined />
+            <Card
+
+              hoverable
+
+              onClick={() =>
+                navigate(
+                  "/dashboard/employee"
+                )
               }
+
+              style={{
+                borderRadius: 18,
+                border:
+                  "1px solid #f0f0f0"
+              }}
+            >
+
+              <Statistic
+
+                title="Employees"
+
+                value={employees}
+
+                prefix={
+                  <TeamOutlined />
+                }
+              />
+
+            </Card>
+
+          </Col>
+
+          {/* REQUESTS */}
+
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={6}
+          >
+
+            <Card
+
+              hoverable
+
+              onClick={() =>
+                navigate(
+                  "/dashboard/leaverequests"
+                )
+              }
+
+              style={{
+                borderRadius: 18,
+                border:
+                  "1px solid #f0f0f0"
+              }}
+            >
+
+              <Statistic
+
+                title="Leave Requests"
+
+                value={
+                  leaveRequests
+                }
+
+                prefix={
+                  <CalendarOutlined />
+                }
+              />
+
+            </Card>
+
+          </Col>
+
+          {/* DEPARTMENT */}
+
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={6}
+          >
+
+            <Card
+
+              hoverable
+
+              onClick={() =>
+                setOpenDepartmentModal(
+                  true
+                )
+              }
+
+              style={{
+                borderRadius: 18,
+                border:
+                  "1px solid #f0f0f0"
+              }}
+            >
+
+              <Statistic
+
+                title="Departments"
+
+                value={
+                  departments.length
+                }
+
+                prefix={
+                  <CheckCircleOutlined />
+                }
+              />
+
+            </Card>
+
+          </Col>
+
+          {/* HOLIDAYS */}
+
+          <Col
+            xs={24}
+            sm={12}
+            md={12}
+            lg={6}
+          >
+
+            <Card
+
+              hoverable
+
+              onClick={() =>
+                setOpenHolidayModal(
+                  true
+                )
+              }
+
+              style={{
+                borderRadius: 18,
+                border:
+                  "1px solid #f0f0f0"
+              }}
+            >
+
+              <Statistic
+
+                title="Holidays"
+
+                value={
+                  holidays.length
+                }
+
+                prefix={
+                  <CalendarOutlined />
+                }
+              />
+
+            </Card>
+
+          </Col>
+
+        </Row>
+
+        {/* IMAGE SECTION */}
+
+        <div
+          style={{
+
+            marginTop: 40,
+
+            display: "flex",
+
+            justifyContent:
+              "center"
+          }}
+        >
+
+          <Card
+            style={{
+
+              width: 570,
+
+              borderRadius: 20,
+
+              textAlign:
+                "center",
+
+              boxShadow:
+                "0 4px 20px rgba(0,0,0,0.06)"
+            }}
+          >
+
+            <h2
+              style={{
+                marginBottom: 20,
+                color: "#1f2937"
+              }}
+            >
+              Company Banner
+            </h2>
+
+            <Image
+
+              src={imageUrl}
+
+              width={300}
+
+              height={500}
+
+              preview={{
+                mask: "View"
+              }}
+
+              style={{
+
+                objectFit:
+                  "cover",
+
+                borderRadius: 18,
+
+                marginBottom: 20
+              }}
             />
 
-          </Card>
-        </Col>
+            <div>
 
-      </Row>
+              <Upload
+
+                showUploadList={
+                  false
+                }
+
+                beforeUpload={() =>
+                  false
+                }
+
+                onChange={
+                  handleUpload
+                }
+              >
+
+                <Button
+
+                  type="primary"
+
+                  icon={
+                    <UploadOutlined />
+                  }
+
+                  size="large"
+
+                  style={{
+                    borderRadius: 10,
+                    marginTop: 30
+                  }}
+                  
+                >
+                  Change Image
+                </Button>
+
+              </Upload>
+
+            </div>
+
+          </Card>
+
+        </div>
+
+      </div>
+
+      {/* DEPARTMENT MODAL */}
 
       <DepartmentModal
-        open={openDepartmentModal}
-        setOpen={setOpenDepartmentModal}
-        // add employees count to each department
-        departments={departments}
+
+        open={
+          openDepartmentModal
+        }
+
+        setOpen={
+          setOpenDepartmentModal
+        }
+
+        departments={
+          departments
+        }
+
         fetchDepartments={
           fetchDepartments
         }
       />
 
+      {/* HOLIDAY MODAL */}
+
       <HolidayModal
-        open={openHolidayModal}
+
+        open={
+          openHolidayModal
+        }
+
         setOpen={
           setOpenHolidayModal
         }
+
         fetchHolidays={
           fetchHolidays
         }
-        holidays={holidays}
+
+        holidays={
+          holidays
+        }
+
         createHoliday={
           createHoliday
         }
+
         updateHoliday={
           updateHoliday
         }
+
         deleteHoliday={
           deleteHoliday
         }

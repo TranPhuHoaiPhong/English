@@ -1,4 +1,3 @@
-import { Layout, Menu } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -6,11 +5,19 @@ import {
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  HistoryOutlined
+  HistoryOutlined,
+  LogoutOutlined
 } from "@ant-design/icons";
+
+import {
+  Layout,
+  Menu,
+  Modal
+} from "antd";
 
 import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { logoutEmployee } from "../../services/Admin/Employee/employeeService";
 
 const { Header, Sider, Content } = Layout;
 
@@ -19,6 +26,30 @@ function Dashboard() {
   const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(true);
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: "Logout",
+      content: "Are you sure you want to logout?",
+      okText: "Logout",
+      cancelText: "Cancel",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await logoutEmployee();
+          localStorage.removeItem(
+            "accessToken"
+          );
+          sessionStorage.clear();
+          navigate("/");
+        } catch (error) {
+          message.error(
+            "Logout failed"
+          );
+        }
+      }
+    });
+  };
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -44,7 +75,13 @@ function Dashboard() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => {
+            if (key === "logout") {
+              handleLogout();
+              return;
+            }
+            navigate(key);
+          }}
           items={[
             {
               key: "/dashboard/admin",
@@ -52,24 +89,14 @@ function Dashboard() {
               label: "Dashboard"
             },
             {
-              key: "/dashboard/employee",
-              icon: <TeamOutlined />,
-              label: "Employees"
-            },
-            {
-              key: "/dashboard/leaverequests",
-              icon: <CalendarOutlined />,
-              label: "Leave Requests"
-            },
-            {
               key: "/dashboard/leavehistory",
               icon: <HistoryOutlined />,
               label: "History"
             },
             {
-              key: "/dashboard/settings",
-              icon: <SettingOutlined />,
-              label: "Settings"
+              key: "logout",
+              icon: <LogoutOutlined />,
+              label: "Logout"
             }
           ]}
         />

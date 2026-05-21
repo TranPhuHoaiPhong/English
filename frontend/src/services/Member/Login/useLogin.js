@@ -28,7 +28,7 @@ export function useLogin() {
             if (data.role === "admin") {
                 setError("");
                 return "admin";
-            } else if (data.role === "member") {
+            } else if (data.role === "employee" || data.role === "manager") {
                 setError("");
                 return "member";
             } else {

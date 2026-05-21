@@ -166,6 +166,19 @@ function LeaveTable({
   // ===== action columns =====
 
   const actionColumns = [
+    
+    {
+      title: "Created At",
+
+      width: 180,
+
+      render: (_, r) =>
+
+        new Date(
+          r.createdAt
+        ).toLocaleString()
+    },
+    
     {
       title: "Status",
       width: 140,
