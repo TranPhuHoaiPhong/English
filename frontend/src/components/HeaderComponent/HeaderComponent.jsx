@@ -3,8 +3,12 @@ import { IoPersonSharp } from "react-icons/io5";
 import { Badge, Popover } from "antd";
 import NotificationDropdown from "../../pages/Member/NotificationPage/NotificationPage";
 import UserDropdown from "../../pages/Member/UserInfo/UserInfo";
+import { useState } from "react";
+import UserProfileModal from "../../pages/Member/UserInfo/UserProfileModal";
 
-function HeaderComponent() {
+function HeaderComponent({dataUser}) {
+  const [openProfile, setOpenProfile] = useState(false);
+
   return (
     <div
       style={{
@@ -34,7 +38,7 @@ function HeaderComponent() {
         <div style={{ display: "flex", gap: 30, alignItems: "center" }}>
           
           {/* 🔔 Notification */}
-          <Popover
+          {/* <Popover
             content={<NotificationDropdown />}
             title="Notifications"
             trigger="click"
@@ -44,20 +48,58 @@ function HeaderComponent() {
             <Badge count={3}>
               <FaBell style={{ fontSize: 26, cursor: "pointer", color: "#fff" }} />
             </Badge>
-          </Popover>
+          </Popover> */}
 
           {/* 👤 Avatar */}
           <Popover
-            content={<UserDropdown />}
+            content={
+              <UserDropdown
+                dataUser={dataUser}
+                setOpenProfile={
+                  setOpenProfile
+                }
+              />
+            }
             trigger="click"
             placement="bottomRight"
-            getPopupContainer={(trigger) => trigger.parentNode}
+            getPopupContainer={(trigger) =>
+              trigger.parentNode
+            }
           >
-            <IoPersonSharp style={{ fontSize: 28, cursor: "pointer" }} />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer"
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "14px",
+                  marginRight: "10px"
+                }}
+              >
+                {dataUser.name}
+              </span>
+
+              <IoPersonSharp
+                style={{
+                  fontSize: 28
+                }}
+              />
+            </div>
           </Popover>
 
         </div>
       </div>
+
+      <UserProfileModal
+        open={openProfile}
+        setOpen={setOpenProfile}
+        dataUser={dataUser}
+      />
+
+      
     </div>
   );
 }

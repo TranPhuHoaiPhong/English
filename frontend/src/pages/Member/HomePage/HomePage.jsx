@@ -7,7 +7,9 @@ import {
   Button,
   Table,
   Progress,
-  Select
+  Select,
+  message,
+  Spin
 } from "antd";
 import {
   CalendarOutlined,
@@ -15,29 +17,93 @@ import {
   CloseCircleOutlined,
   ClockCircleOutlined
 } from "@ant-design/icons";
-import { useState } from "react";
-import { leaveBalance, requests } from "../../../services/Member/HomePage/dashboardData";
+import { getEmployees } from "../../../services/Member/HomePage/dashboardData";
 import { requestColumns } from "./tableColumns";
 import LeaveRequestModal from "./LeaveRequestModel";
 import { useNavigate } from "react-router-dom";
+import {
+  useState,
+  useEffect
+} from "react";
+import { addLeaveRequest } from "../../../services/Member/LeaveRequest/LeaveRequest";
 
 const { Option } = Select;
-
+ 
 function HomePage() {
-  const [year, setYear] = useState(2026);
 
-  const filteredRequests = requests.filter(r => r.year === year);
-
-  const totalUsed = leaveBalance.reduce((sum, item) => sum + item.used, 0);
-  const total = leaveBalance.reduce((sum, item) => sum + item.total, 0);
+  const [year, setYear] = useState(
+    new Date().getFullYear()
+  );
 
   const [open, setOpen] = useState(false);
-
   const navigate = useNavigate();
+
+  const [dataUser, setDataUser] = useState({});
+  const [dataRequest, setDataRequest] = useState([]);
+  const [dataTotal, setDataTotal] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const fetchDataUser = async () => {
+    try {
+      const data = await getEmployees();
+
+      setDataUser(data.employees);
+      setDataRequest(data.leaveRequests)
+      setDataTotal(data.totalRequest)
+    } catch (error) {
+
+      message.error(
+        "Failed to fetch data. Please try again later."
+      );
+    }
+  }
+
+  useEffect(() => {
+
+    const fetchData = async () => {
+
+      try {
+
+        setLoading(true);
+
+        await Promise.all([
+          fetchDataUser()
+        ]);
+
+      } catch (error) {
+
+        message.error("Failed to load dashboard");
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+    fetchData();
+
+  }, []);
+
+  const filteredRequests = dataRequest
+
+  const handleAdd = async (payload) => {
+      try {
+        await addLeaveRequest(payload);
+        message.success(
+          "Created successfully"
+        );
+        setOpen(false);
+        fetchData();
+      } catch {
+        message.error("Create failed");
+      }
+    };
 
   return (
     <>
-      <HeaderComponent />
+      <Spin spinning={loading} size="large">
+        <HeaderComponent dataUser={dataUser}/>
 
       <div style={{ padding: 20, maxWidth: 1200, margin: "0 auto" }}>
         <Row
@@ -60,35 +126,40 @@ function HomePage() {
             onClick={() => setOpen(true)}>
             Request Leave
           </Button>
-          <LeaveRequestModal open={open} setOpen={setOpen} />
+          <LeaveRequestModal
+            open={open}
+            setOpen={setOpen}
+            employeeId={dataUser._id}
+            handleAdd={handleAdd}
+          />
         </Row>
 
         <Row gutter={16} style={{ marginBottom: 20 }}>
-          {leaveBalance.map((item, index) => {
-            const percent = (item.used / item.total) * 100;
-
-            return (
-              <Col span={24} key={index}>
-                <Card style={{ borderRadius: 12 }}>
-                  <Statistic
-                    title={`${item.type} Leave`}
-                    value={item.remaining}
-                    suffix="days left"
-                  />
-
-                  <Progress
-                    percent={percent}
-                    showInfo={false}
-                    strokeColor={percent > 70 ? "#ff4d4f" : "#1890ff"}
-                  />
-
-                  <div style={{ marginTop: 8 }}>
-                    Total used: {item.used} / {item.total} days
-                  </div>
-                </Card>
-              </Col>
-            );
-          })}
+          <Col span={24}>
+            <Card style={{ borderRadius: 12 }}>
+              <Statistic
+                title="Annual Leave"
+                value={dataUser?.leaveBalance || 0}
+                suffix="days left"
+              />
+              <Progress
+                percent={
+                  ((13 - (dataUser?.leaveBalance || 0)) / 13) * 100
+                }
+                showInfo={false}
+                strokeColor={
+                  (dataUser?.leaveBalance || 0) <= 3
+                    ? "#ff4d4f"
+                    : "#1890ff"
+                }
+              />
+              <div style={{ marginTop: 8 }}>
+                Total used: {
+                  13 - (dataUser?.leaveBalance || 0)
+                } / 13 days
+              </div>
+            </Card>
+          </Col>
         </Row>
 
         <Row gutter={16} style={{ marginBottom: 20 }}>
@@ -96,7 +167,7 @@ function HomePage() {
             <Card>
               <Statistic
                 title="Pending"
-                value={filteredRequests.filter(r => r.status === "pending").length}
+                value={dataTotal.pending}
                 valueStyle={{ color: "#faad14" }}
                 prefix={<ClockCircleOutlined />}
               />
@@ -107,7 +178,7 @@ function HomePage() {
             <Card>
               <Statistic
                 title="Approved"
-                value={filteredRequests.filter(r => r.status === "approved").length}
+                value={dataTotal.approved}
                 valueStyle={{ color: "#52c41a" }}
                 prefix={<CheckCircleOutlined />}
               />
@@ -118,18 +189,29 @@ function HomePage() {
             <Card>
               <Statistic
                 title="Rejected"
-                value={filteredRequests.filter(r => r.status === "rejected").length}
+                value={dataTotal.rejected}
                 valueStyle={{ color: "#ff4d4f" }}
                 prefix={<CloseCircleOutlined />}
               />
             </Card>
           </Col>
 
+          {/* <Col span={5}>
+            <Card>
+              <Statistic
+                title="Cancelled"
+                value={filteredRequests.filter(r => r.status === "cancelled").length}
+                valueStyle={{ color: "#ff4d4f" }}
+                prefix={<CloseCircleOutlined />}
+              />
+            </Card>
+          </Col> */}
+
           <Col span={6}>
             <Card>
               <Statistic
                 title="Total"
-                value={filteredRequests.length}
+                value={dataTotal.total}
                 prefix={<CalendarOutlined />}
               />
             </Card>
@@ -146,33 +228,23 @@ function HomePage() {
             }}>
               
               <span style={{ fontWeight: 600 }}>
-                Leave Requests ({year})
+                Leave Requests 
               </span>
 
-              <Select value={year} onChange={setYear} style={{ width: 120 }}>
-                <Select.Option value={2026}>2026</Select.Option>
-                <Select.Option value={2025}>2025</Select.Option>
-              </Select>
 
             </div>
           }
         >
           <Table
+            rowKey="_id"
             columns={requestColumns}
-            dataSource={filteredRequests}
+            dataSource={dataRequest}
             pagination={false}
-            onRow={(record) => ({
-              onClick: () => {
-                console.log("Row data:", record);
-
-                // 👉 chuyển trang + truyền data
-                // navigate("/notification", { state: record });
-              }
-            })}
           />
         </Card>
 
       </div>
+      </Spin>
     </>
   );
 }

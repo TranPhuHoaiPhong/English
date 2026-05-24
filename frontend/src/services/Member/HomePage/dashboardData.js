@@ -1,174 +1,56 @@
-export const leaveBalance = [
-  { type: "Annual", total: 12, used: 5, remaining: 7 }
-];
+import axios from "axios";
 
-export const requests = [
-  {
-    key: 1,
-    start: "2026-05-01",
-    end: "2026-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2026
-  },
-  {
-    key: 2,
-    start: "2026-04-10",
-    end: "2026-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2026
-  },
-  {
-    key: 3,
-    start: "2026-03-15",
-    end: "2026-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2026
-  },
-  {
-    key: 4,
-    start: "2026-05-01",
-    end: "2026-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2026
-  },
-  {
-    key: 5,
-    start: "2026-04-10",
-    end: "2026-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2026
-  },
-  {
-    key: 6,
-    start: "2026-03-15",
-    end: "2026-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2026
-  },
-  {
-    key: 4,
-    start: "2026-05-01",
-    end: "2026-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2026
-  },
-  {
-    key: 5,
-    start: "2026-04-10",
-    end: "2026-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2026
-  },
-  {
-    key: 6,
-    start: "2026-03-15",
-    end: "2026-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2026
-  },
-  {
-    key: 4,
-    start: "2026-05-01",
-    end: "2026-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2026
-  },
-  {
-    key: 5,
-    start: "2026-04-10",
-    end: "2026-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2026
-  },
-  {
-    key: 6,
-    start: "2026-03-15",
-    end: "2026-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2026
-  },
-  {
-    key: 4,
-    start: "2026-05-01",
-    end: "2026-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2026
-  },
-  {
-    key: 5,
-    start: "2026-04-10",
-    end: "2026-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2026
-  },
-  {
-    key: 6,
-    start: "2026-03-15",
-    end: "2026-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2026
-  },
-  {
-    key: 1,
-    start: "2025-05-01",
-    end: "2025-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2025
-  },
-  {
-    key: 2,
-    start: "2025-04-10",
-    end: "2025-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2025
-  },
-  {
-    key: 3,
-    start: "2025-03-15",
-    end: "2025-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2025
-  },
-  {
-    key: 4,
-    start: "2025-05-01",
-    end: "2025-05-03",
-    type: "Annual",
-    status: "pending",
-    year: 2025
-  },
-  {
-    key: 5,
-    start: "2025-04-10",
-    end: "2025-04-12",
-    type: "Sick",
-    status: "approved",
-    year: 2025
-  },
-  {
-    key: 6,
-    start: "2025-03-15",
-    end: "2025-03-16",
-    type: "Annual",
-    status: "rejected",
-    year: 2025
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
+
+export const getEmployees = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  if (!accessToken) {
+    throw new Error("No access token found");
   }
-];
+
+  const res = await axios.get(
+    `${API_URL}/api/client/home`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  );
+
+  return res.data.data;
+};
+
+export const logoutEmployee = async () => {
+
+    const accessToken =
+      localStorage.getItem(
+        "accessToken"
+      );
+
+    if (!accessToken) {
+
+      throw new Error(
+        "No access token found"
+      );
+    }
+
+    const res =
+      await axios.post(
+
+        `${API_URL}/api/client/sign-out`,
+
+        {},
+
+        {
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`
+          },
+
+          withCredentials: true
+        }
+      );
+
+    return res.data;
+};

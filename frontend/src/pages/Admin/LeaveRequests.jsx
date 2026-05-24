@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { message, Button} from "antd";
+import { message, Button, Spin} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import removeVietnameseTones from "../../utils/removeVietnameseTones";
 import LeaveFilter from "../../components/Admin/LeaveRequest/LeaveFilter";
@@ -15,6 +15,7 @@ function LeavePage() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // ===== fetch =====
 
@@ -37,8 +38,31 @@ function LeavePage() {
   };
 
   useEffect(() => {
-    fetchLeaveRequests();
-    fetchEmployees();
+
+    const fetchData = async () => {
+
+      try {
+
+        setLoading(true);
+
+        await Promise.all([
+          fetchEmployees(),
+          fetchLeaveRequests()
+        ]);
+
+      } catch (error) {
+
+        message.error("Failed to load dashboard");
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+    fetchData();
+
   }, []);
 
   // ===== filter =====
@@ -195,7 +219,8 @@ function LeavePage() {
 
   return (
     <>
-      <div
+      <Spin spinning={loading} size="large">
+        <div
         style={{
           display: "flex",
           justifyContent:
@@ -261,6 +286,7 @@ function LeavePage() {
         }
         employees={employees}
       />
+      </Spin>
     </>
   );
 }

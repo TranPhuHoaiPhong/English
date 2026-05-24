@@ -86,7 +86,7 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
 
       formData.append(
         "employeeId",
-        values.employeeId
+        values.employeeId.value
       );
 
       formData.append(
@@ -135,7 +135,9 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
 
       } else {
         handleAdd(formData);
-      }
+        form.resetFields(); 
+        setOpen(false);
+            }
     };
 
   return (

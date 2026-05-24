@@ -5,7 +5,8 @@ import {
   Input,
   Space,
   Popover,
-  Image
+  Image,
+  Spin
 } from "antd";
 import { useEffect, useState } from "react";
 import { getHistoryLeaveRequest } from "../../services/Admin/HistoryRequest/HistoryRequest";
@@ -16,6 +17,8 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function LeaveHistoryPage() {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [
     statusFilter,
     setStatusFilter
@@ -41,8 +44,31 @@ function LeaveHistoryPage() {
     }
   };
 
-    useEffect(() => {
-    fetchLeaveRequests();
+  useEffect(() => {
+
+    const fetchData = async () => {
+
+      try {
+
+        setLoading(true);
+
+        await Promise.all([
+          fetchLeaveRequests()
+        ]);
+
+      } catch (error) {
+
+        message.error("Failed to load dashboard");
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+    fetchData();
+
   }, []);
 
   // ===== remove vietnamese =====
@@ -315,8 +341,8 @@ function LeaveHistoryPage() {
 ];
 
   return (
-
-    <div>
+    <Spin spinning={loading} size="large">
+      <div>
 
       {/* FILTER */}
 
@@ -449,6 +475,7 @@ function LeaveHistoryPage() {
       />
 
     </div>
+    </Spin>
   );
 }
 

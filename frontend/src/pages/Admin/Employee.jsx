@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { Form, message } from "antd";
+import { Form, message, Spin } from "antd";
 import { getDepartments } from "../../services/Admin/Department/departmentService";
 import removeVietnameseTones from "../../utils/removeVietnameseTones";
 
@@ -25,9 +25,33 @@ function EmployeePage() {
   const [roleFilter, setRoleFilter] = useState("employee");
 
   const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEmployees();
+
+    const fetchData = async () => {
+
+      try {
+
+        setLoading(true);
+
+        await Promise.all([
+          fetchEmployees(),
+        ]);
+
+      } catch (error) {
+
+        message.error("Failed to load dashboard");
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+    fetchData();
+
   }, []);
 
   const fetchEmployees = async () => {
@@ -143,7 +167,9 @@ function EmployeePage() {
 
   return (
     <>
-      <EmployeeFilter
+      <Spin spinning={loading} size="large">
+        <div>
+          <EmployeeFilter
         roleFilter={roleFilter}
         setRoleFilter={setRoleFilter}
         searchText={searchText}
@@ -166,6 +192,8 @@ function EmployeePage() {
         form={form}
         departments={departments}
       />
+        </div>
+      </Spin>
     </>
   );
 }

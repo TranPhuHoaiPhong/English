@@ -6,7 +6,7 @@ export const getLeaveRequest = async () => {
     const accessToken = localStorage.getItem("accessToken");
 
     const res = await axios.get(
-        `${API_URL}/api/client/leaverequests`,
+        `${API_URL}/api/admin/leaverequests`,
         {
           headers: {
             Authorization:

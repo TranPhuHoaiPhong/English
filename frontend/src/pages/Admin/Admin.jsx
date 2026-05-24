@@ -6,7 +6,8 @@ import {
   message,
   Image,
   Upload,
-  Button
+  Button,
+  Spin
 } from "antd";
 
 import {
@@ -86,6 +87,8 @@ function AdminDashboard() {
     setLeaveRequests
   ] = useState(0);
 
+  const [loading, setLoading] = useState(true);
+
   const [
     imageUrl,
     setImageUrl
@@ -121,8 +124,7 @@ function AdminDashboard() {
 
   // ===== fetch departments =====
 
-  const fetchDepartments =
-    async () => {
+  const fetchDepartments = async () => {
 
     try {
 
@@ -205,13 +207,31 @@ function AdminDashboard() {
 
   useEffect(() => {
 
-    fetchDepartments();
+    const fetchData = async () => {
 
-    fetchHolidays();
+      try {
 
-    fetchEmployees();
+        setLoading(true);
 
-    fetchLeaveRequests();
+        await Promise.all([
+          fetchDepartments(),
+          fetchHolidays(),
+          fetchEmployees(),
+          fetchLeaveRequests()
+        ]);
+
+      } catch (error) {
+
+        message.error("Failed to load dashboard");
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
+
+    fetchData();
 
   }, []);
 
@@ -219,7 +239,8 @@ function AdminDashboard() {
 
     <>
 
-      <div
+      <Spin spinning={loading} size="large">
+          <div
         style={{
           padding: 10
         }}
@@ -563,6 +584,8 @@ function AdminDashboard() {
           deleteHoliday
         }
       />
+
+      </Spin>
 
     </>
   );

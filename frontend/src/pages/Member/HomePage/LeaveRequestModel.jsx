@@ -1,120 +1,290 @@
-import { useState } from "react";
 import {
-  Button,
   Modal,
   Form,
   Input,
   DatePicker,
   Select,
+  Button,
   Upload
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import { motion } from "framer-motion";
+
+import {
+  UploadOutlined
+} from "@ant-design/icons";
+
+import { useEffect } from "react";
 
 const { RangePicker } = DatePicker;
 
-function LeaveRequestModal({ open, setOpen }) {
+function LeaveRequestModal({
+  open,
+  setOpen,
+  employeeId,
+  handleAdd
+}) {
+
   const [form] = Form.useForm();
 
-  // 👇 theo dõi leave_type
-  const leaveType = Form.useWatch("leave_type", form);
-  const reasonType = Form.useWatch("reason_type", form);
+  // ===== set employee id =====
 
-  const handleSubmit = (values) => {
-    console.log("Form values:", values);
-    setOpen(false);
+  useEffect(() => {
+
+    if (open) {
+
+      form.setFieldsValue({
+        employeeId
+      });
+    }
+
+  }, [
+    open,
+    employeeId,
+    form
+  ]);
+
+  // ===== submit =====
+
+  const handleSubmit = async () => {
+
+    const values =
+      await form.validateFields();
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "employeeId",
+      values.employeeId
+    );
+
+    formData.append(
+      "leaveType",
+      values.leaveType
+    );
+
+    formData.append(
+      "startDate",
+      values.dates[0].format(
+        "YYYY-MM-DD"
+      )
+    );
+
+    formData.append(
+      "endDate",
+      values.dates[1].format(
+        "YYYY-MM-DD"
+      )
+    );
+
+    formData.append(
+      "reason",
+      values.reason || ""
+    );
+
+    // ===== upload file =====
+
+    if (
+      values.leaveType === "SICK" &&
+      values.medicalProof?.length > 0
+    ) {
+
+      formData.append(
+        "medicalProof",
+        values.medicalProof[0]
+          .originFileObj
+      );
+    }
+
+    await handleAdd(formData);
+
     form.resetFields();
+
+    setOpen(false);
   };
 
   return (
-    <Modal
-      title="Request Leave"
-      open={open}
-      onCancel={() => setOpen(false)}
-      onOk={() => form.submit()}
-      centered
-      destroyOnClose
-    >
-      <Form layout="vertical" form={form} onFinish={handleSubmit}>
 
-        {/* Leave Type */}
+    <Modal
+      open={open}
+      width={700}
+      onCancel={() => {
+
+        form.resetFields();
+
+        setOpen(false);
+      }}
+
+      onOk={handleSubmit}
+
+      title="Request Leave"
+    >
+
+      <Form
+        form={form}
+        layout="vertical"
+      >
+
+        {/* hidden employee id */}
+
+        <Form.Item
+          name="employeeId"
+          hidden
+        >
+          <Input />
+        </Form.Item>
+
         <Form.Item
           label="Leave Type"
-          name="leave_type"
-          rules={[{ required: true }]}
+          name="leaveType"
+          rules={[
+            {
+              required: true,
+              message:
+                "Please select leave type"
+            }
+          ]}
         >
-          <Select placeholder="Select type">
-            <Select.Option value="annual">Annual</Select.Option>
-            <Select.Option value="sick">Sick</Select.Option>
-            <Select.Option value="unpaid">Unpaid</Select.Option>
-            <Select.Option value="other">Other</Select.Option>
+          <Select>
+
+            <Select.Option value="ANNUAL">
+              ANNUAL
+            </Select.Option>
+
+            <Select.Option value="MARRIAGE">
+              MARRIAGE
+            </Select.Option>
+
+            <Select.Option value="CHILD_MARRIAGE">
+              CHILD_MARRIAGE
+            </Select.Option>
+
+            <Select.Option value="FUNERAL">
+              FUNERAL
+            </Select.Option>
+
+            <Select.Option value="MILITARY_EXAM">
+              MILITARY_EXAM
+            </Select.Option>
+
+            <Select.Option value="WORK_ACCIDENT">
+              WORK_ACCIDENT
+            </Select.Option>
+
+            <Select.Option value="FOREIGN_VISIT">
+              FOREIGN_VISIT
+            </Select.Option>
+
+            <Select.Option value="SICK">
+              SICK
+            </Select.Option>
+
+            <Select.Option value="MATERNITY">
+              MATERNITY
+            </Select.Option>
+
+            <Select.Option value="PERSONAL">
+              PERSONAL
+            </Select.Option>
+
           </Select>
         </Form.Item>
 
-        {/* Date */}
         <Form.Item
-          label="Date"
-          name="date_range"
-          rules={[{ required: true }]}
+          label="Date Range"
+          name="dates"
+          rules={[
+            {
+              required: true,
+              message:
+                "Please select date range"
+            }
+          ]}
         >
-          <RangePicker style={{ width: "100%" }} />
+          <RangePicker
+            style={{
+              width: "100%"
+            }}
+          />
         </Form.Item>
 
-        {/* Reason */}
         <Form.Item
           label="Reason"
-          name="reason_type"
-          rules={[{ required: true, message: "Please select a reason" }]}
+          name="reason"
+          rules={[
+            {
+              required: true,
+              message:
+                "Please enter reason"
+            }
+          ]}
         >
-          <Select placeholder="Select reason">
-            <Select.Option value="family">Việc gia đình gấp</Select.Option>
-            <Select.Option value="admin">Công việc hành chính</Select.Option>
-            <Select.Option value="study">Thi cử / học tập</Select.Option>
-            <Select.Option value="event">Hiếu hỉ</Select.Option>
-            <Select.Option value="other">Lý do cá nhân khác</Select.Option>
-          </Select>
+          <Input.TextArea
+            rows={4}
+          />
         </Form.Item>
 
-        {/* 👇 chỉ hiện khi chọn "other" */}
-        {reasonType === "other" && (
-          <Form.Item
-            label="Other reason"
-            name="reason"
-            rules={[
-              { required: true, message: "Please enter your reason" },
-              { max: 200, message: "Max 200 characters" }
-            ]}
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Nhập lý do cụ thể..."
-            />
-          </Form.Item>
-        )}
+        {/* ===== sick only ===== */}
 
-        {/* 👇 Chỉ hiện khi sick */}
-        {leaveType === "sick" && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            transition={{ duration: 0.25 }}
-            style={{ overflow: "hidden" }}
-          >
-            <Form.Item
-              label="Medical Proof (optional)"
-              name="attachments"
-              // ❌ bỏ required
-            >
-              <Upload beforeUpload={() => false}>
-                <Button icon={<UploadOutlined />}>
-                  Upload file (optional)
-                </Button>
-              </Upload>
-            </Form.Item>
-          </motion.div>
-        )}
+        <Form.Item
+          shouldUpdate
+          noStyle
+        >
+          {() => {
+
+            const leaveType =
+              form.getFieldValue(
+                "leaveType"
+              );
+
+            if (
+              leaveType !== "SICK"
+            ) {
+
+              return null;
+            }
+
+            return (
+
+              <Form.Item
+                label="Medical Proof"
+                name="medicalProof"
+                valuePropName="fileList"
+                getValueFromEvent={(e) =>
+                  e?.fileList
+                }
+
+                rules={[
+                  {
+                    required: true,
+                    message:
+                      "Please upload medical proof"
+                  }
+                ]}
+              >
+
+                <Upload
+                  listType="picture"
+                  beforeUpload={() => false}
+                  maxCount={1}
+                >
+
+                  <Button
+                    icon={
+                      <UploadOutlined />
+                    }
+                  >
+                    Upload Medical Proof
+                  </Button>
+
+                </Upload>
+
+              </Form.Item>
+            );
+          }}
+        </Form.Item>
 
       </Form>
+
     </Modal>
   );
 }
