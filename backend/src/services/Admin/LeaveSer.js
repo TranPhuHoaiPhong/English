@@ -654,6 +654,25 @@ const rejectLeaveRequestService = async (id) => {
       };
     }
 
+      if (
+        leaveRequest.leaveType ===
+        "ANNUAL"
+      ) {
+
+        const employee =
+          await Employee.findById(
+            leaveRequest.employeeId
+          );
+
+        if (employee) {
+
+          employee.leaveBalance +=
+            leaveRequest.totalDays;
+
+          await employee.save();
+        }
+      }
+
     leaveRequest.status = "REJECTED";
     await leaveRequest.save();
 

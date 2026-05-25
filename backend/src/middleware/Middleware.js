@@ -106,5 +106,5 @@ const authUserApp = (req, res, next) => {
 module.exports = {
   authMiddleware, // chỉ cho admin
   authUserMiddleware, // cho admin hoặc chính user
-  authUserApp, // xác thực cho app (member)
+  authUserApp, // xác thực cho app (member) qua token, lưu userId vào req.userId để controller dùng
 };
