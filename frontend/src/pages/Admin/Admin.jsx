@@ -54,6 +54,8 @@ import {
   deleteHoliday
 }
 from "../../services/Admin/Holiday/Holiday";
+import axios from "axios";
+import { getBanner, uploadBanner } from "../../services/Admin/Banner/Banner";
 
 function AdminDashboard() {
 
@@ -88,39 +90,70 @@ function AdminDashboard() {
   ] = useState(0);
 
   const [loading, setLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState("");
 
-  const [
-    imageUrl,
-    setImageUrl
-  ] = useState(
-    "http://localhost:5000/uploads/1779290020594-700869217.jpg"
-  );
-
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
   // ===== upload image =====
 
-  const handleUpload = (
-    info
-  ) => {
+  const handleUpload = async (info) => {
+    try {
+      setLoading(true);
+      const file =
+        info.file.originFileObj;
 
-    const file =
-      info.file.originFileObj;
+      if (!file) return;
 
-    if (!file) return;
+      // preview local image
+      const localUrl =
+        URL.createObjectURL(file);
 
-    const localUrl =
-      URL.createObjectURL(
-        file
+      setImageUrl(localUrl);
+
+      // call api
+      const data = await uploadBanner(file);
+      setImageUrl(
+        `${API_URL}/uploads/${data.data.banner.fileName}`
       );
 
-    setImageUrl(localUrl);
 
-    message.success(
-      "Image updated"
-    );
+      message.success(
+        "Image uploaded successfully"
+      );
+
+      await fetchBanner()
+
+    } catch (error) {
+
+      console.log(error);
+
+      message.error(
+        "Upload failed"
+      );
+    }
+    finally{
+        setLoading(false)
+    }
   };
+
+  const fetchBanner = async () => {
+
+      try {
+        const data = await getBanner();
+
+        const fileName = data.data.banner.fileName;
+
+        setImageUrl(
+          `${API_URL}/uploads/${fileName}`
+        );
+ 
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
 
   // ===== fetch departments =====
 
@@ -217,7 +250,8 @@ function AdminDashboard() {
           fetchDepartments(),
           fetchHolidays(),
           fetchEmployees(),
-          fetchLeaveRequests()
+          fetchLeaveRequests(),
+          fetchBanner()
         ]);
 
       } catch (error) {
@@ -428,105 +462,69 @@ function AdminDashboard() {
 
         <div
           style={{
-
             marginTop: 40,
-
             display: "flex",
-
-            justifyContent:
-              "center"
+            justifyContent: "center",
           }}
         >
-
           <Card
             style={{
-
               width: 570,
-
               borderRadius: 20,
-
-              textAlign:
-                "center",
-
+              textAlign: "center",
               boxShadow:
-                "0 4px 20px rgba(0,0,0,0.06)"
+                "0 4px 20px rgba(0,0,0,0.06)",
             }}
           >
-
             <h2
               style={{
                 marginBottom: 20,
-                color: "#1f2937"
+                color: "#1f2937",
               }}
             >
               Company Banner
             </h2>
 
             <Image
-
-              src={imageUrl}
-
+              src={
+                imageUrl
+              }
               width={300}
-
               height={500}
-
               preview={{
-                mask: "View"
+                mask: "View",
               }}
-
               style={{
-
-                objectFit:
-                  "cover",
-
+                objectFit: "cover",
                 borderRadius: 18,
-
-                marginBottom: 20
+                marginBottom: 20,
               }}
             />
 
             <div>
-
               <Upload
+                showUploadList={false}
+                beforeUpload={(file) => {
+                  handleUpload({
+                    file: {
+                      originFileObj: file
+                    }
+                  });
 
-                showUploadList={
-                  false
-                }
-
-                beforeUpload={() =>
-                  false
-                }
-
-                onChange={
-                  handleUpload
-                }
+                  return false;
+                }}
               >
-
                 <Button
-
                   type="primary"
-
-                  icon={
-                    <UploadOutlined />
-                  }
-
+                  icon={<UploadOutlined />}
                   size="large"
-
-                  style={{
-                    borderRadius: 10,
-                    marginTop: 30
-                  }}
-                  
+                  style={{ marginTop: "12px"}}
                 >
                   Change Image
                 </Button>
-
               </Upload>
-
             </div>
-
           </Card>
-
         </div>
 
       </div>

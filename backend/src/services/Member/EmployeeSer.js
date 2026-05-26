@@ -103,8 +103,43 @@ const loginEmployeeService = async ({ email, password }) => {
   };
 };
 
+const changePasswordEmployeesSer = async (id, password) => {
+    try {
+
+        const employee = await Employee.findById(id);
+
+        if (!employee) {
+            return {
+                status: "ERROR",
+                message: "Employee not found"
+            };
+        }
+
+        // hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // update password
+        employee.password = hashedPassword;
+
+        await employee.save();
+
+        return {
+            status: "SUCCESS",
+            message: "Change password successfully"
+        };
+
+    } catch (error) {
+
+        return {
+            status: "ERROR",
+            message: error.message
+        };
+
+    }
+};
 
 module.exports = {
   loginEmployeeService,
   getEmployeeService,
+  changePasswordEmployeesSer
 };

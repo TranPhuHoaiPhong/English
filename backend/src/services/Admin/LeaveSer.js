@@ -2,6 +2,8 @@ const LeaveRequest = require("../../models/LeaveRequest");
 const Employee = require("../../models/Employee");
 const CompanyHoliday = require("../../models/CompanyHoliday");
 
+const { sendMail } = require("../../util/sendMail");
+
 const createLeaveRequestService = async (data) => {
 
   const { employeeId, leaveType, startDate, endDate, reason, medicalProof } = data;
@@ -625,8 +627,32 @@ const deleteLeaveRequestService = async (id) => {
     };
 };
 
-const approveLeaveRequestService = async (id) => {
-    const leaveRequest = await LeaveRequest.findById(id);
+// const approveLeaveRequestService = async (id, employeeId) => {
+//     const leaveRequest = await LeaveRequest.findById(id);
+
+//     if (!leaveRequest) {
+//       return {
+//         status: "ERROR",
+//         message: "Leave request not found"
+//       };
+//     }
+
+//     leaveRequest.status = "APPROVED";
+//     await leaveRequest.save();
+
+//     return {    
+//       status: "SUCCESS",
+//       message: "Leave request approved"
+//     };
+// }
+
+const approveLeaveRequestService = async (
+  id,
+  employeeId
+) => {
+  try {
+    const leaveRequest =
+      await LeaveRequest.findById(id);
 
     if (!leaveRequest) {
       return {
@@ -635,52 +661,141 @@ const approveLeaveRequestService = async (id) => {
       };
     }
 
+    // tìm employee
+    const employee =
+      await Employee.findById(employeeId);
+
+    if (!employee) {
+      return {
+        status: "ERROR",
+        message: "Employee not found"
+      };
+    }
+
+    // update status
     leaveRequest.status = "APPROVED";
+
     await leaveRequest.save();
 
-    return {    
-      status: "SUCCESS",
-      message: "Leave request approved"
-    };
-}
+    // gửi mail
+    await sendMail({
+      to: employee.email,
+      subject: "Leave Request Approved",
+      html: `
+        <h2>Leave Request Approved</h2>
 
-const rejectLeaveRequestService = async (id) => {
-    const leaveRequest = await LeaveRequest.findById(id);
+        <p>Hello ${employee.name},</p>
 
-    if (!leaveRequest) {
-      return {
-        status: "ERROR",
-        message: "Leave request not found"
-      };
-    }
+        <p>
+          Your leave request has been
+          <b>approved</b>.
+        </p>
 
-      if (
-        leaveRequest.leaveType ===
-        "ANNUAL"
-      ) {
-
-        const employee =
-          await Employee.findById(
-            leaveRequest.employeeId
-          );
-
-        if (employee) {
-
-          employee.leaveBalance +=
-            leaveRequest.totalDays;
-
-          await employee.save();
-        }
-      }
-
-    leaveRequest.status = "REJECTED";
-    await leaveRequest.save();
+        <p>
+          Thank you.
+        </p>
+      `
+    });
 
     return {
       status: "SUCCESS",
-      message: "Leave request rejected"
+      message:
+        "Leave request approved and email sent"
     };
-}
+
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: "ERROR",
+      message: error.message
+    };
+  }
+};
+
+const rejectLeaveRequestService = async (
+  id,
+  employeeId
+) => {
+  try {
+    const leaveRequest =
+      await LeaveRequest.findById(id);
+
+    if (!leaveRequest) {
+      return {
+        status: "ERROR",
+        message: "Leave request not found"
+      };
+    }
+
+    // tìm employee
+    const employee =
+      await Employee.findById(
+        leaveRequest.employeeId
+      );
+
+    if (!employee) {
+      return {
+        status: "ERROR",
+        message: "Employee not found"
+      };
+    }
+
+    // hoàn lại phép nếu là annual leave
+    if (
+      leaveRequest.leaveType ===
+      "ANNUAL"
+    ) {
+      employee.leaveBalance +=
+        leaveRequest.totalDays;
+
+      await employee.save();
+    }
+
+    // update status
+    leaveRequest.status = "REJECTED";
+
+    await leaveRequest.save();
+
+    // gửi mail
+    await sendMail({
+      to: employee.email,
+      subject: "Leave Request Rejected",
+      html: `
+        <h2>Leave Request Rejected</h2>
+
+        <p>Hello ${employee.name},</p>
+
+        <p>
+          Your leave request has been
+          <b>rejected</b>.
+        </p>
+
+        <p>
+          Please contact HR for more details.
+        </p>
+
+        <p>
+          Thank you.
+        </p>
+      `
+    });
+
+    return {
+      status: "SUCCESS",
+      message:
+        "Leave request rejected and email sent"
+    };
+
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: "ERROR",
+      message: error.message
+    };
+  }
+};
 
 
 module.exports = {

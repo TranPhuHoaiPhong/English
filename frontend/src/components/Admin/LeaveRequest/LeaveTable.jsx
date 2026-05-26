@@ -208,7 +208,8 @@ function LeaveTable({
 
             onClick={() =>
               handleApprove(
-                r._id
+                r._id,
+                r.employeeId
               )
             }
           >

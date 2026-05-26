@@ -16,6 +16,7 @@ function LeavePage() {
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // ===== fetch =====
 
@@ -98,16 +99,16 @@ function LeavePage() {
 
   // ===== approve =====
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, employeeId) => {
       try {
-        console.log("Approving leave request:", id);
-        await ApproveLeaveRequest(id);
+        setActionLoading(true);
+        await ApproveLeaveRequest(id, employeeId);
 
         message.success(
           "Approved successfully"
         );
 
-        fetchLeaveRequests();
+        await fetchLeaveRequests();
 
       } catch {
 
@@ -115,33 +116,36 @@ function LeavePage() {
           "Approve failed"
         );
       }
+      finally{
+        setActionLoading(false);
+      }
     };
 
   // ===== reject =====
 
-  const handleReject = async (id) => {
+  const handleReject = async (id, employeeId) => {
 
       try {
-
+        setActionLoading(true)
         await RejectLeaveRequest(
           id,
-          {
-            status:
-              "REJECTED"
-          }
+          employeeId
         );
 
         message.success(
           "Rejected successfully"
         );
 
-        fetchLeaveRequests();
+        await fetchLeaveRequests();
 
       } catch {
 
         message.error(
           "Reject failed"
         );
+      }
+      finally {
+        setActionLoading(false)
       }
     };
 
@@ -153,7 +157,7 @@ function LeavePage() {
 ) => {
 
   try {
-
+    setActionLoading(true)
     const res =
       await updateLeaveRequest(
         id,
@@ -167,7 +171,7 @@ function LeavePage() {
 
     setOpenModal(false);
 
-    fetchLeaveRequests();
+    await fetchLeaveRequests();
 
   } catch (error) {
 
@@ -175,6 +179,8 @@ function LeavePage() {
       error.message ||
       "Update failed"
     );
+  }finally{
+    setActionLoading(false)
   }
 };
 
@@ -183,7 +189,7 @@ function LeavePage() {
   const handleDelete = async (id) => {
 
       try {
-
+        setActionLoading(true)
         await deleteLeaveRequest(id);
 
         message.success(
@@ -199,6 +205,8 @@ function LeavePage() {
         message.error(
           "Delete failed"
         );
+      }finally{
+        setActionLoading(false)
       }
     };
 
@@ -206,6 +214,7 @@ function LeavePage() {
 
   const handleAdd = async (payload) => {
       try {
+        setActionLoading(true)
         await addLeaveRequest(payload);
         message.success(
           "Created successfully"
@@ -214,12 +223,14 @@ function LeavePage() {
         fetchLeaveRequests();
       } catch {
         message.error("Create failed");
+      }finally{
+        setActionLoading(false)
       }
     };
 
   return (
     <>
-      <Spin spinning={loading} size="large">
+      <Spin spinning={loading || actionLoading} size="large">
         <div
         style={{
           display: "flex",

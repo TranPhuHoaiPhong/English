@@ -1,13 +1,19 @@
 import { FaBell } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
 import { Badge, Popover } from "antd";
-import NotificationDropdown from "../../pages/Member/NotificationPage/NotificationPage";
 import UserDropdown from "../../pages/Member/UserInfo/UserInfo";
 import { useState } from "react";
 import UserProfileModal from "../../pages/Member/UserInfo/UserProfileModal";
+import ChangePasswordModal from "../Member/ChangePasswordModal";
 
-function HeaderComponent({dataUser}) {
-  const [openProfile, setOpenProfile] = useState(false);
+function HeaderComponent({ dataUser }) {
+  const [openProfile, setOpenProfile] =
+    useState(false);
+
+  const [
+    openChangePassword,
+    setOpenChangePassword
+  ] = useState(false);
 
   return (
     <div
@@ -25,28 +31,47 @@ function HeaderComponent({dataUser}) {
           maxWidth: "1200px",
           margin: "0 auto",
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent:
+            "space-between",
           alignItems: "center"
         }}
       >
         {/* LEFT */}
-        <div style={{ fontSize: 18, fontWeight: "bold" }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: "bold"
+          }}
+        >
           Leave Management System
         </div>
 
         {/* RIGHT */}
-        <div style={{ display: "flex", gap: 30, alignItems: "center" }}>
-          
+        <div
+          style={{
+            display: "flex",
+            gap: 30,
+            alignItems: "center"
+          }}
+        >
           {/* 🔔 Notification */}
           {/* <Popover
             content={<NotificationDropdown />}
             title="Notifications"
             trigger="click"
             placement="bottomRight"
-            getPopupContainer={(trigger) => trigger.parentNode}
+            getPopupContainer={(trigger) =>
+              trigger.parentNode
+            }
           >
             <Badge count={3}>
-              <FaBell style={{ fontSize: 26, cursor: "pointer", color: "#fff" }} />
+              <FaBell
+                style={{
+                  fontSize: 26,
+                  cursor: "pointer",
+                  color: "#fff"
+                }}
+              />
             </Badge>
           </Popover> */}
 
@@ -57,6 +82,9 @@ function HeaderComponent({dataUser}) {
                 dataUser={dataUser}
                 setOpenProfile={
                   setOpenProfile
+                }
+                setOpenChangePassword={
+                  setOpenChangePassword
                 }
               />
             }
@@ -89,17 +117,23 @@ function HeaderComponent({dataUser}) {
               />
             </div>
           </Popover>
-
         </div>
       </div>
 
+      {/* PROFILE MODAL */}
       <UserProfileModal
         open={openProfile}
         setOpen={setOpenProfile}
         dataUser={dataUser}
       />
 
-      
+      {/* CHANGE PASSWORD MODAL */}
+      <ChangePasswordModal
+        open={openChangePassword}
+        setOpen={
+          setOpenChangePassword
+        }
+      />
     </div>
   );
 }

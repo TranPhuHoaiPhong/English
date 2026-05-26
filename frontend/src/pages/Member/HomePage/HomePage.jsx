@@ -94,7 +94,7 @@ function HomePage() {
           "Created successfully"
         );
         setOpen(false);
-        fetchData();
+        fetchDataUser();
       } catch {
         message.error("Create failed");
       }

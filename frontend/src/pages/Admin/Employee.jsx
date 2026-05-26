@@ -118,7 +118,7 @@ function EmployeePage() {
 
   const handleSubmit = async () => {
     try {
-
+      setLoading(true)
       const values = await form.validateFields();
 
       if (editingEmployee) {
@@ -131,9 +131,17 @@ function EmployeePage() {
       } 
       
       else {
-        const data = await createEmployee(values);
+        try {
+          const data = await createEmployee(values);
 
-        message.success("Added successfully");
+          message.success("Added successfully");
+
+        } catch (error) {
+        
+          message.error(
+            error.response?.data?.message || "Add failed"
+          );
+        }
       }
 
       await fetchEmployees();
@@ -146,11 +154,14 @@ function EmployeePage() {
 
       message.error("An error occurred");
     }
+    finally{
+      setLoading(false)
+    }
   };
 
   const handleDelete = async (id) => {
     try {
-
+      setLoading(true)
       await deleteEmployee(id);
 
       message.success("Deleted successfully");
@@ -162,6 +173,8 @@ function EmployeePage() {
       console.log(error);
 
       message.error("Failed to delete employee");
+    } finally{
+      setLoading(false)
     }
   };
 

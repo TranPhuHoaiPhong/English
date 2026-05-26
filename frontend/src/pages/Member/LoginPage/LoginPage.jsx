@@ -2,13 +2,17 @@ import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 import { useLogin } from "../../../services/Member/Login/useLogin";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getBanner } from "../../../services/Admin/Banner/Banner";
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function LoginPage() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
 
   const {
     email,
@@ -16,57 +20,103 @@ function LoginPage() {
     error,
     setMail,
     setPassword,
-    handleLogin
+    handleLogin,
   } = useLogin();
 
+  // ===== login =====
   const onSubmit = async () => {
     setLoading(true);
+
     const role = await handleLogin();
- 
+
     setLoading(false);
-    
+
     if (role === "member") {
       navigate("/home");
-    }
-    else if (role === "admin") {
+    } else if (role === "admin") {
       navigate("/dashboard/admin");
     }
-  }
+  };
+
+  // ===== fetch banner =====
+  const fetchBanner = async () => {
+    try {
+      const data = await getBanner();
+
+      const fileName = data?.data?.banner?.fileName;
+
+      if (fileName) {
+        setImageUrl(
+          `${API_URL}/uploads/${fileName}`
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ===== load banner when page open =====
+  useEffect(() => {
+    fetchBanner();
+  }, []);
 
   return (
     <>
       <div className="login-container">
         <div className="login-card">
-          
-          <div className="login-left"></div>
 
+          {/* LEFT BANNER */}
+          <div
+            className="login-left"
+            style={{
+              backgroundImage: imageUrl
+                ? `url(${imageUrl})`
+                : "none",
+            }}
+          ></div>
+
+          {/* RIGHT FORM */}
           <div className="login-right">
             <div className="login-content">
-              
-              <img src="https://sunluxe.com.sg/Content/Upload/Images/1764292623000.png" alt="Logo" className="logo" />
-              <p className="subtitle">Sign into your account</p>
+
+              <img
+                src="https://sunluxe.com.sg/Content/Upload/Images/1764292623000.png"
+                alt="Logo"
+                className="logo"
+              />
+
+              <p className="subtitle">
+                Sign into your account
+              </p>
 
               <input
                 type="email"
                 placeholder="Email address"
                 className="input"
                 value={email}
-                onChange={(e) => setMail(e.target.value)}
+                onChange={(e) =>
+                  setMail(e.target.value)
+                }
               />
-              
 
               <div style={{ position: "relative" }}>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword ? "text" : "password"
+                  }
                   placeholder="Password"
                   className="input"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
                   style={{ paddingRight: 40 }}
                 />
 
                 <span
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
                   style={{
                     position: "absolute",
                     right: 10,
@@ -74,18 +124,29 @@ function LoginPage() {
                     transform: "translateY(-50%)",
                     cursor: "pointer",
                     color: "#888",
-                    fontSize: "large"
+                    fontSize: "large",
                   }}
                 >
-                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  {showPassword ? (
+                    <EyeInvisibleOutlined />
+                  ) : (
+                    <EyeOutlined />
+                  )}
                 </span>
               </div>
 
               <p className="error">{error}</p>
-              <button className="login-btn" onClick={onSubmit}>LOGIN</button>
+
+              <button
+                className="login-btn"
+                onClick={onSubmit}
+              >
+                LOGIN
+              </button>
 
               <p className="register">
-                Don't remmember password? <span>Click here</span>
+                Don't remember password?{" "}
+                <span>Click here</span>
               </p>
 
               <p className="policy">
@@ -97,6 +158,8 @@ function LoginPage() {
 
         </div>
       </div>
+
+      {/* LOADING */}
       {loading && (
         <div className="loading-overlay">
           <div className="spinner"></div>

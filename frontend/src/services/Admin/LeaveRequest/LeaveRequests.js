@@ -109,14 +109,14 @@ export const deleteLeaveRequest = async (id) => {
 };
 
 // ===== APPROVE =====
-export const ApproveLeaveRequest = async (id) => {
+export const ApproveLeaveRequest = async (id, employeeId) => {
     const accessToken =
       localStorage.getItem(
         "accessToken"
       );
     const res =
       await axios.put(   
-        `${API_URL}/api/admin/leaverequest/${id}/approve`,
+        `${API_URL}/api/admin/leaverequest/${id}/approve/${employeeId}`,
         {
           status: "APPROVED"
         },
@@ -131,14 +131,14 @@ export const ApproveLeaveRequest = async (id) => {
 };
 
 // ===== REJECT ===== 
-export const RejectLeaveRequest = async (id) => {
+export const RejectLeaveRequest = async (id, employeeId) => {
     const accessToken =
       localStorage.getItem(
         "accessToken"
       );
     const res =
       await axios.put(
-        `${API_URL}/api/admin/leaverequest/${id}/reject`,
+        `${API_URL}/api/admin/leaverequest/${id}/reject/${employeeId}`,
         {
           status: "REJECTED"
         },

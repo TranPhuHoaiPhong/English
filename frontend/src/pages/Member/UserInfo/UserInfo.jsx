@@ -4,11 +4,19 @@ import {
   LockOutlined,
   LogoutOutlined
 } from "@ant-design/icons";
-import {logoutEmployee} from "../../../services/Member/HomePage/dashboardData"
+
+import {
+  logoutEmployee
+} from "../../../services/Member/HomePage/dashboardData";
+
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 
-function UserDropdown({dataUser, setOpenProfile}) {
+function UserDropdown({
+  dataUser,
+  setOpenProfile,
+  setOpenChangePassword
+}) {
   const navigate = useNavigate();
 
   const menu = [
@@ -31,30 +39,41 @@ function UserDropdown({dataUser, setOpenProfile}) {
 
   const handleClick = (item) => {
     if (item.key === "logout") {
-      console.log("Logout...");
       handleLogout();
-    } else if (item.key === "profile") {
+
+    } else if (
+      item.key === "profile"
+    ) {
       setOpenProfile(true);
-    }else if (item.key === "password") {
-      console.log("Change password");
+
+    } else if (
+      item.key === "password"
+    ) {
+      setOpenChangePassword(true);
     }
   };
 
   const handleLogout = () => {
     Modal.confirm({
       title: "Logout",
-      content: "Are you sure you want to logout?",
+      content:
+        "Are you sure you want to logout?",
       okText: "Logout",
       cancelText: "Cancel",
       okType: "danger",
+
       onOk: async () => {
         try {
           await logoutEmployee();
+
           localStorage.removeItem(
             "accessToken"
           );
+
           sessionStorage.clear();
+
           navigate("/");
+
         } catch (error) {
           message.error(
             "Logout failed"
@@ -70,7 +89,9 @@ function UserDropdown({dataUser, setOpenProfile}) {
         dataSource={menu}
         renderItem={(item) => (
           <List.Item
-            onClick={() => handleClick(item)}
+            onClick={() =>
+              handleClick(item)
+            }
             style={{
               cursor: "pointer",
               padding: "10px 15px",

@@ -110,8 +110,31 @@ const logoutEmployee = async (req, res) => {
     }
 };
 
+const changePasswordEmployees = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const {password} = req.body;
+
+    const result = await EmployeeService.changePasswordEmployeesSer(userId, password);
+
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(201).json(result);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error",
+    });
+  }
+};
+
 module.exports = {
   loginEmployee,
   getEmployees,
-  logoutEmployee
+  logoutEmployee,
+  changePasswordEmployees
 };

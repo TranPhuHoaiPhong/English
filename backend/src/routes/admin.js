@@ -5,6 +5,7 @@ const EmployeeContr = require("../controllers/Admin/EmployeeContr");
 const DepartmentContr = require("../controllers/Admin/DepartmentContr");
 const HolidayContr = require("../controllers/Admin/Holiday");
 const LeaveContr = require("../controllers/Admin/LeaveContr");
+const BannerContr = require("../controllers/Admin/BannerContr")
 
 const upload = require("../middleware/upload");
 
@@ -33,9 +34,14 @@ router.post("/leaverequest", authMiddleware, upload.single("medicalProof"), Leav
 router.put("/leaverequest/:id", authMiddleware, upload.single("medicalProof"), LeaveContr.updateLeaveRequest);
 router.get("/leaverequests", authMiddleware, LeaveContr.getLeaveRequests);
 router.delete("/leaverequest/:id", authMiddleware, LeaveContr.deleteLeaveRequest);
-router.put("/leaverequest/:id/approve", authMiddleware, LeaveContr.approveLeaveRequest);
-router.put("/leaverequest/:id/reject", authMiddleware, LeaveContr.rejectLeaveRequest);
+router.put("/leaverequest/:id/approve/:employeeId", authMiddleware, LeaveContr.approveLeaveRequest);
+router.put("/leaverequest/:id/reject/:employeeId", authMiddleware, LeaveContr.rejectLeaveRequest);
 router.get("/history/leaverequests", authMiddleware, LeaveContr.getHistoryLeaveRequests);
+
+router.post("/banner", authMiddleware, upload.single("banner"), BannerContr.createBanner);
+router.get("/banner", authMiddleware, BannerContr.getBanner);
+
+
 
 
 module.exports = router;
