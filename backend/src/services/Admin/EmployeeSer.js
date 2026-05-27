@@ -246,7 +246,9 @@ const updateEmployeeService = async (id, data) => {
 };
 
 const deleteEmployeeService = async (id) => {
-  const employee = await Employee.findById(id);
+
+  const employee =
+    await Employee.findById(id);
 
   if (!employee) {
     return {
@@ -255,11 +257,18 @@ const deleteEmployeeService = async (id) => {
     };
   }
 
-  await Employee.findByIdAndDelete(id);
+  employee.status =
+    employee.status === "ACTIVE"
+      ? "INACTIVE"
+      : "ACTIVE";
+
+  await employee.save();
 
   return {
     status: "SUCCESS",
-    message: "Delete employee success",
+    message:
+      `Employee ${employee.status.toLowerCase()} successfully`,
+    data: employee,
   };
 };
 

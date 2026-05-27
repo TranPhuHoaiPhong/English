@@ -161,9 +161,8 @@ function AdminDashboard() {
 
     try {
 
-      const data =
-        await getDepartments();
-
+      const data = await getDepartments();
+      
       setDepartments(data);
 
     } catch (error) {
@@ -196,9 +195,7 @@ function AdminDashboard() {
 
   // ===== fetch employees =====
 
-  const fetchEmployees =
-    async () => {
-
+  const fetchEmployees = async () => {
     try {
 
       const data =
@@ -380,15 +377,12 @@ function AdminDashboard() {
           >
 
             <Card
-
               hoverable
-
               onClick={() =>
                 setOpenDepartmentModal(
                   true
                 )
               }
-
               style={{
                 borderRadius: 18,
                 border:
@@ -397,20 +391,15 @@ function AdminDashboard() {
             >
 
               <Statistic
-
                 title="Departments"
-
                 value={
                   departments.length
                 }
-
                 prefix={
                   <CheckCircleOutlined />
                 }
               />
-
             </Card>
-
           </Col>
 
           {/* HOLIDAYS */}

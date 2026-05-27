@@ -31,7 +31,7 @@ function DepartmentTable({
 
     {
       title: "Employees",
-      dataIndex: "totalEmployees",
+      dataIndex: "employeeCount",
       width: 150,
       align: "center",
       className: "text-center"

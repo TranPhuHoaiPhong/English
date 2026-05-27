@@ -164,7 +164,7 @@ function EmployeePage() {
       setLoading(true)
       await deleteEmployee(id);
 
-      message.success("Deleted successfully");
+      message.success("Activated successfully");
 
       await fetchEmployees();
 
@@ -172,7 +172,7 @@ function EmployeePage() {
 
       console.log(error);
 
-      message.error("Failed to delete employee");
+      message.error("Failed to activate employee");
     } finally{
       setLoading(false)
     }
@@ -183,28 +183,28 @@ function EmployeePage() {
       <Spin spinning={loading} size="large">
         <div>
           <EmployeeFilter
-        roleFilter={roleFilter}
-        setRoleFilter={setRoleFilter}
-        searchText={searchText}
-        setSearchText={setSearchText}
-        openModal={openModal}
-      />
+            roleFilter={roleFilter}
+            setRoleFilter={setRoleFilter}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            openModal={openModal}
+          />
 
-      <EmployeeTable
-        filteredData={filteredData}
-        departments={departments}
-        openModal={openModal}
-        handleDelete={handleDelete}
-      />
+          <EmployeeTable
+            filteredData={filteredData}
+            departments={departments}
+            openModal={openModal}
+            handleDelete={handleDelete}
+          />
 
-      <EmployeeModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        handleSubmit={handleSubmit}
-        editingEmployee={editingEmployee}
-        form={form}
-        departments={departments}
-      />
+          <EmployeeModal
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            handleSubmit={handleSubmit}
+            editingEmployee={editingEmployee}
+            form={form}
+            departments={departments}
+          />
         </div>
       </Spin>
     </>

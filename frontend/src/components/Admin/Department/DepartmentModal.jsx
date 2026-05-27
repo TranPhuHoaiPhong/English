@@ -1,7 +1,8 @@
 import {
   Modal,
   Button,
-  message
+  message,
+  Spin
 } from "antd";
 
 import { useState } from "react";
@@ -40,13 +41,15 @@ function DepartmentModal({
     try {
       await deleteDepartment(id);
       await fetchDepartments();
+      message.success("Deleted successfully")
     } catch (error) {
+      console.log("ee", error)
       message.error("Failed to delete department");
     }
   };
 
   return (
-    <>
+    <> 
       <Modal
         title="Department Management"
         open={open}
@@ -83,7 +86,6 @@ function DepartmentModal({
         editingDepartment={editingDepartment}
         fetchDepartments={fetchDepartments}
       />
-
     </>
   );
 }

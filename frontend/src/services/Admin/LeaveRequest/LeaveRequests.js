@@ -131,16 +131,16 @@ export const ApproveLeaveRequest = async (id, employeeId) => {
 };
 
 // ===== REJECT ===== 
-export const RejectLeaveRequest = async (id, employeeId) => {
+export const RejectLeaveRequest = async (id, rejectReason) => {
     const accessToken =
       localStorage.getItem(
         "accessToken"
       );
     const res =
       await axios.put(
-        `${API_URL}/api/admin/leaverequest/${id}/reject/${employeeId}`,
+        `${API_URL}/api/admin/leaverequest/${id}/reject`,
         {
-          status: "REJECTED"
+          rejectReason
         },
         {
           headers: {

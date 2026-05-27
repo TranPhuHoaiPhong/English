@@ -20,7 +20,7 @@ function LeaveRequestModal({
   open,
   setOpen,
   employeeId,
-  handleAdd
+  handleAdd,
 }) {
 
   const [form] = Form.useForm();
@@ -94,12 +94,13 @@ function LeaveRequestModal({
           .originFileObj
       );
     }
+    
 
-    await handleAdd(formData);
-
-    form.resetFields();
-
-    setOpen(false);
+    const success = await handleAdd(formData);
+    if (success) {
+      form.resetFields();
+      setOpen(false);
+    }
   };
 
   return (

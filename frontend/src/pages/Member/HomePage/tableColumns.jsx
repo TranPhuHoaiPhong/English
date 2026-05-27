@@ -1,22 +1,62 @@
 import {
   Tag,
   Image,
-  Popover
+  Popover,
 } from "antd";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL =
+  import.meta.env.VITE_BACKEND_URL;
 
 export const requestColumns = [
   {
     title: "Employee",
     dataIndex: "employeeName",
-    key: "employeeName"
+    key: "employeeName",
+
+    render: (_, record) => {
+
+      // row tháng
+      if (record.isGroup) {
+        return {
+          children: (
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 18,
+                padding: "6px 0",
+              }}
+            >
+              {record.title}
+            </div>
+          ),
+
+          props: {
+            colSpan: 7,
+          },
+        };
+      }
+
+      return record.employeeName;
+    },
   },
 
   {
     title: "Leave Type",
     dataIndex: "leaveType",
-    key: "leaveType"
+    key: "leaveType",
+
+    render: (value, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
+
+      return value;
+    },
   },
 
   {
@@ -24,8 +64,20 @@ export const requestColumns = [
     dataIndex: "startDate",
     key: "startDate",
 
-    render: (date) =>
-      new Date(date).toLocaleDateString()
+    render: (date, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
+
+      return new Date(
+        date
+      ).toLocaleDateString();
+    },
   },
 
   {
@@ -33,14 +85,39 @@ export const requestColumns = [
     dataIndex: "endDate",
     key: "endDate",
 
-    render: (date) =>
-      new Date(date).toLocaleDateString()
+    render: (date, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
+
+      return new Date(
+        date
+      ).toLocaleDateString();
+    },
   },
 
   {
     title: "Days",
     dataIndex: "totalDays",
-    key: "totalDays"
+    key: "totalDays",
+
+    render: (value, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
+
+      return value;
+    },
   },
 
   {
@@ -50,14 +127,19 @@ export const requestColumns = [
 
     render: (_, r) => {
 
-      // Không phải nghỉ bệnh
+      if (r.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
+
       if (r.leaveType !== "SICK") {
         return "-";
       }
 
-      // Nghỉ bệnh nhưng chưa upload ảnh
       if (!r.medicalProof?.fileName) {
-
         return (
           <Tag color="red">
             Missing
@@ -65,18 +147,15 @@ export const requestColumns = [
         );
       }
 
-      // Có ảnh
       return (
         <Popover
           trigger="hover"
           content={
             <Image
-              src={
-                `${API_URL}/uploads/${r.medicalProof.fileName}`
-              }
+              src={`${API_URL}/uploads/${r.medicalProof.fileName}`}
               width={220}
               style={{
-                borderRadius: 8
+                borderRadius: 8,
               }}
             />
           }
@@ -84,14 +163,14 @@ export const requestColumns = [
           <Tag
             color="green"
             style={{
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             View
           </Tag>
         </Popover>
       );
-    }
+    },
   },
 
   {
@@ -99,7 +178,15 @@ export const requestColumns = [
     dataIndex: "status",
     key: "status",
 
-    render: (status) => {
+    render: (status, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
 
       let color = "default";
 
@@ -124,6 +211,6 @@ export const requestColumns = [
           {status}
         </Tag>
       );
-    }
-  }
+    },
+  },
 ];

@@ -43,11 +43,34 @@ const createDepartmentService = async (data) => {
 };
 
 const getDepartmentService = async () => {
-  const departments = await Department.find();
-  return {
-    status: "SUCCESS",
-    data: departments
-  };
+    const departments =
+      await Department.find();
+
+    const departmentsWithCount =
+      await Promise.all(
+
+        departments.map(
+          async (department) => {
+
+            const employeeCount =
+              await Employee.countDocuments({
+                department:
+                  department._id,
+              });
+
+            return {
+              ...department.toObject(),
+              employeeCount,
+            };
+          }
+        )
+      );
+
+    return {
+      status: "SUCCESS",
+      data:
+        departmentsWithCount,
+    };
 };
 
 const updateDepartmentService = async (id, data) => {

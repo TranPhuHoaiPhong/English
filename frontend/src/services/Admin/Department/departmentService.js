@@ -13,7 +13,7 @@ export const getDepartments = async () => {
       });
 
     return res.data.data;
-  };
+};
 
 export const createDepartment = async (data) => {
     const accessToken = localStorage.getItem("accessToken");

@@ -36,36 +36,40 @@ function DepartmentFormModal({
   }, [editingDepartment]);
 
   const handleSubmit = async () => {
-
     try {
-
-      const values =
-        await form.validateFields();
+      const values = await form.validateFields();
 
       // update
       if (editingDepartment) {
-        await updateDepartment(editingDepartment._id, values);
+        await updateDepartment(
+          editingDepartment._id,
+          values
+        );
         fetchDepartments();
-
         message.success(
           "Updated successfully"
         );
+        setOpen(false);
+
       }
 
+      // create
       else {
-
         await createDepartment(values);
         fetchDepartments();
-
         message.success(
           "Added successfully"
         );
+        setOpen(false);
+
       }
+      // reset form
+      form.resetFields();
 
+      // reset editing
+      setEditingDepartment(null);
       setOpen(false);
-
     } catch (error) {
-
       console.log(error);
     }
   };

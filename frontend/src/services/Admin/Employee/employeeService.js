@@ -57,8 +57,6 @@ export const createEmployee = async (data) => {
     }
   );
 
-  console.log("return", data)
-
   return res.data;
 };
  

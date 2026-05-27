@@ -4,8 +4,15 @@ import {
   Button,
   Space,
   Image,
-  Popover
+  Popover,
+  Popconfirm,
+  Modal,
+  Input
 } from "antd";
+
+import {
+  useState
+} from "react";
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function LeaveTable({
@@ -14,6 +21,15 @@ function LeaveTable({
   handleApprove,
   handleReject
 }) {
+
+  const [rejectOpen, setRejectOpen] =
+    useState(false);
+
+  const [rejectReason, setRejectReason] =
+    useState("");
+
+  const [selectedId, setSelectedId] =
+    useState(null);
 
   // ===== color =====
 
@@ -34,35 +50,23 @@ function LeaveTable({
 
     {
       title: "Code",
-
-      width: 100,
-
+      width: 150,
       fixed: "left",
-
       render: (_, r) =>
-
         r.employeeCode
     },
 
     {
       title: "Name",
-
-      width: 180,
-
+      width: 200,
       ellipsis: true,
-
       render: (_, r) =>
-
         r.employeeName
     },
-
     {
       title: "Type",
-
-      width: 100,
-
+      width: 150,
       render: (_, r) => (
-
         <Tag
           color={
             typeColor(
@@ -118,7 +122,7 @@ function LeaveTable({
 
   const medicalProofColumn = {
     title: "Medical Proof",
-    width: 180,
+    width: 150,
 
     render: (_, r) => {
       if (
@@ -176,20 +180,35 @@ function LeaveTable({
 
         new Date(
           r.createdAt
-        ).toLocaleString()
+        ).toLocaleDateString("en-US")
     },
     
     {
       title: "Status",
       width: 140,
-      render: (_, r) => (
 
-        <Tag>
+      render: (_, r) => {
 
-          {r.status}
+        let color = "default";
 
-        </Tag>
-      )
+        if (r.status === "PENDING") {
+          color = "gold";
+        }
+
+        if (r.status === "APPROVED") {
+          color = "green";
+        }
+
+        if (r.status === "REJECTED") {
+          color = "red";
+        }
+
+        return (
+          <Tag color={color}>
+            {r.status}
+          </Tag>
+        );
+      }
     },
 
     {
@@ -203,30 +222,33 @@ function LeaveTable({
 
         <Space>
 
-          <Button
-            type="primary"
-
-            onClick={() =>
+          <Popconfirm
+            title="Approve leave request?"
+            okText="Approve"
+            cancelText="Cancel"
+            onConfirm={() =>
               handleApprove(
                 r._id,
                 r.employeeId
               )
             }
           >
-            Approve
-          </Button>
+            <Button type="primary">
+              Approve
+            </Button>
+          </Popconfirm>
 
           <Button
-            danger
+  danger
+  onClick={() => {
 
-            onClick={() =>
-              handleReject(
-                r._id
-              )
-            }
-          >
-            Reject
-          </Button>
+    setSelectedId(r._id);
+
+    setRejectOpen(true);
+  }}
+>
+  Reject
+</Button>
 
           <Button
             onClick={() =>
@@ -265,30 +287,115 @@ function LeaveTable({
         ];
 
   return (
+    <>
 
-    <Table
+      <style>
+        {`
+          .expired-row td {
+            background: #fff1f0 !important;
+          }
+        `}
+      </style>
 
-      rowKey="_id"
+      <Table
+        rowKey="_id"
 
-      columns={columns}
+        columns={columns}
 
-      dataSource={
-        filteredData
-      }
+        dataSource={
+          filteredData
+        }
 
-      pagination={false}
+        pagination={false}
 
-      tableLayout="fixed"
+        tableLayout="fixed"
 
-      scroll={{
-        x: 1600,
-        y: 650
-      }}
+        scroll={{
+          x: 1600,
+          y: 650
+        }}
 
-      style={{
-        width: "100%"
-      }}
-    />
+        rowClassName={(record) => {
+
+          const createdAt =
+            new Date(record.createdAt);
+
+          const now =
+            new Date();
+
+          const diffDays =
+            (now - createdAt) /
+            (1000 * 60 * 60 * 24);
+
+          if (
+            diffDays > 1 &&
+            record.status === "PENDING"
+          ) {
+            return "expired-row";
+          }
+
+          return "";
+        }}
+
+        style={{
+          width: "100%"
+        }}
+      />
+
+      <Modal
+  open={rejectOpen}
+
+  title="Reject Leave Request"
+
+  okText="Reject"
+
+  cancelText="Cancel"
+
+  okButtonProps={{
+    danger: true
+  }}
+
+  onCancel={() => {
+
+    setRejectOpen(false);
+
+    setRejectReason("");
+
+    setSelectedId(null);
+  }}
+
+  onOk={() => {
+
+    handleReject(
+      selectedId,
+      rejectReason
+    );
+
+    setRejectOpen(false);
+
+    setRejectReason("");
+
+    setSelectedId(null);
+  }}
+>
+
+  <Input.TextArea
+    rows={4}
+
+    placeholder="Enter reject reason..."
+
+    value={rejectReason}
+
+    onChange={(e) =>
+      setRejectReason(
+        e.target.value
+      )
+    }
+  />
+
+</Modal>
+
+    </>
   );
 }
 

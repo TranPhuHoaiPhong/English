@@ -123,13 +123,12 @@ function LeavePage() {
 
   // ===== reject =====
 
-  const handleReject = async (id, employeeId) => {
-
+  const handleReject = async (id, rejectReason) => {
       try {
         setActionLoading(true)
         await RejectLeaveRequest(
           id,
-          employeeId
+          rejectReason
         );
 
         message.success(

@@ -89,16 +89,65 @@ function HomePage() {
 
   const handleAdd = async (payload) => {
       try {
-        await addLeaveRequest(payload);
-        message.success(
-          "Created successfully"
-        );
-        setOpen(false);
-        fetchDataUser();
+        setLoading(true)
+        const result = await addLeaveRequest(payload);
+        if (result.status === "ERROR") {
+          message.error(result.message);
+          return false
+        } 
+        
+         message.success(
+            "Created successfully"
+          );
+
+          fetchDataUser();
+
+          return true;
+        
       } catch {
         message.error("Create failed");
+        return false
+      }
+      finally{
+        setLoading(false)
       }
     };
+
+  const groupedData = [];
+
+  let currentGroup = "";
+
+  [...dataRequest]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt) -
+        new Date(a.createdAt)
+    )
+    .forEach((item) => {
+
+      const date = new Date(
+        item.createdAt
+      );
+
+      const monthYear =
+        `${date.toLocaleString("en-US", {
+          month: "long",
+        })} ${date.getFullYear()}`;
+
+      // nếu khác tháng/năm
+      if (monthYear !== currentGroup) {
+
+        currentGroup = monthYear;
+
+        groupedData.push({
+          _id: `group-${monthYear}`,
+          isGroup: true,
+          title: monthYear,
+        });
+      }
+
+      groupedData.push(item);
+    });
 
   return (
     <>
@@ -196,17 +245,6 @@ function HomePage() {
             </Card>
           </Col>
 
-          {/* <Col span={5}>
-            <Card>
-              <Statistic
-                title="Cancelled"
-                value={filteredRequests.filter(r => r.status === "cancelled").length}
-                valueStyle={{ color: "#ff4d4f" }}
-                prefix={<CloseCircleOutlined />}
-              />
-            </Card>
-          </Col> */}
-
           <Col span={6}>
             <Card>
               <Statistic
@@ -238,7 +276,7 @@ function HomePage() {
           <Table
             rowKey="_id"
             columns={requestColumns}
-            dataSource={dataRequest}
+            dataSource={groupedData}
             pagination={false}
           />
         </Card>

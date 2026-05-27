@@ -145,10 +145,11 @@ const approveLeaveRequest = async (req, res) => {
 
 const rejectLeaveRequest = async (req, res) => {
   try {
-    const result =
-      await LeaveService.rejectLeaveRequestService(
+    const { rejectReason } = req.body;
+    const result = await LeaveService.rejectLeaveRequestService(
         req.params.id,
-        req.params.employeeId
+        req.params.employeeId,
+        rejectReason
       );
     if (result.status === "ERROR") {
       return res.status(400).json(result);

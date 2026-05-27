@@ -1,4 +1,4 @@
-import { Table, Button, Space, Popconfirm } from "antd";
+import { Table, Button, Space, Popconfirm, Tag } from "antd";
 
 function EmployeeTable({
   filteredData,
@@ -7,7 +7,7 @@ function EmployeeTable({
   handleDelete
 }) {
   const columns = [
-    { title: "Name", dataIndex: "name", width: "15%" },
+    { title: "Name", dataIndex: "name", width: "10%" },
     { title: "Code", dataIndex: "code", width: "10%" },
     { title: "Leave Balance", dataIndex: "leaveBalance", width: "10%" },
     { title: "Email", dataIndex: "email", width: "20%" },
@@ -16,7 +16,7 @@ function EmployeeTable({
     {
       title: "Department",
       dataIndex: ["department", "name"],
-      width: "12%",
+      width: "7%",
       },
 
     {
@@ -27,29 +27,74 @@ function EmployeeTable({
         role.charAt(0).toUpperCase() +
         role.slice(1)
     },
+    {
+      title: "Status",
+      dataIndex: "status",
+      width: "10%",
 
+      render: (status) => {
+
+        const color =
+          status === "ACTIVE"
+            ? "green"
+            : "red";
+
+        return (
+          <Tag color={color}>
+            {status}
+          </Tag>
+        );
+      },
+    },
     {
       title: "Action",
       width: "13%",
       render: (_, record) => {
-        const isAdmin = record.role === "admin";
+        const isAdmin =
+          record.role === "admin";
+
+        const isActive =
+          record.status === "ACTIVE";
 
         return (
           <Space>
+
             {!isAdmin && (
-              <Button onClick={() => openModal(record)}>
+              <Button
+                onClick={() =>
+                  openModal(record)
+                }
+              >
                 Edit
               </Button>
             )}
 
             {!isAdmin && (
               <Popconfirm
-                title="Sure to delete?"
-                onConfirm={() => handleDelete(record._id)}
+                title={
+                  isActive
+                    ? "Sure to inactivate?"
+                    : "Sure to activate?"
+                }
+                onConfirm={() =>
+                  handleDelete(record._id)
+                }
               >
-                <Button danger>Delete</Button>
+                <Button
+                  danger={isActive}
+                  type={
+                    isActive
+                      ? "default"
+                      : "primary"
+                  }
+                >
+                  {isActive
+                    ? "Inactivate"
+                    : "Activate"}
+                </Button>
               </Popconfirm>
             )}
+
           </Space>
         );
       }
