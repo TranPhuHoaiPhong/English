@@ -4,6 +4,8 @@ import { useLogin } from "../../../services/Member/Login/useLogin";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { getBanner } from "../../../services/Admin/Banner/Banner";
+import { Modal, Input, message } from "antd";
+import { resetPw } from "../../../services/Member/Login/resetPw";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -13,6 +15,8 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   const {
     email,
@@ -61,6 +65,33 @@ function LoginPage() {
   useEffect(() => {
     fetchBanner();
   }, []);
+
+const handleForgotPassword = async () => {
+  try {
+
+    if (!resetEmail) {
+      message.error("Please enter email");
+      return;
+    }
+
+    const result = await resetPw(resetEmail);
+
+
+    if (result.status === "ERROR") {
+      message.error(result.message);
+      return;
+    }
+
+    message.success(result.message);
+
+    setIsModalOpen(false);
+    setResetEmail("");
+
+  } catch (error) {
+    console.log(error);
+    message.error("Failed to send reset email");
+  }
+};
 
   return (
     <>
@@ -148,7 +179,15 @@ function LoginPage() {
 
               <p className="register">
                 Don't remember password?{" "}
-                <span>Click here</span>
+                <span
+                  style={{
+                    color: "#1677ff",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  Click here
+                </span>
               </p>
 
               <p className="policy">
@@ -167,6 +206,37 @@ function LoginPage() {
           <div className="spinner"></div>
         </div>
       )}
+
+
+      <Modal
+        title="Forgot Password"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 15,
+          }}
+        >
+          <Input
+            placeholder="Enter your email"
+            value={resetEmail}
+            onChange={(e) =>
+              setResetEmail(e.target.value)
+            }
+          />
+
+          <button
+            className="login-btn"
+            onClick={handleForgotPassword}
+          >
+            RESET PASSWORD
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }

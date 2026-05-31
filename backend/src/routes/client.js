@@ -12,7 +12,10 @@ router.post("/leaverequest", authUserApp, upload.single("medicalProof"), LeaveCo
 
 router.get("/home", authUserApp, EmployeeMemberContr.getEmployees);
 router.post("/sign-out", authUserApp, EmployeeMemberContr.logoutEmployee);
-router.post("/change-password", authUserApp, EmployeeMemberContr.changePasswordEmployees);
+router.post("/change-password", authUserApp, EmployeeMemberContr.changePasswordEmployees); 
+
+router.post("/reset-password", EmployeeMemberContr.resetPasswordEmployees); 
+router.put("/cancel/:id", authUserApp, LeaveContrU.cancelLeaveRequest); 
 
 
 module.exports = router;

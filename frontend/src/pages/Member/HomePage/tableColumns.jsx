@@ -2,12 +2,16 @@ import {
   Tag,
   Image,
   Popover,
+  Button,
+  Popconfirm,
+  message
 } from "antd";
+import { cancelRequest } from "../../../services/Member/Login/resetPw";
 
 const API_URL =
   import.meta.env.VITE_BACKEND_URL;
 
-export const requestColumns = [
+export const requestColumns = (fetchDataUser) => [
   {
     title: "Employee",
     dataIndex: "employeeName",
@@ -123,7 +127,7 @@ export const requestColumns = [
   {
     title: "Medical Proof",
     key: "medicalProof",
-    width: 180,
+    width: 130,
 
     render: (_, r) => {
 
@@ -228,7 +232,61 @@ export const requestColumns = [
         };
       }
 
-      return doneBy?.name || "-";
+      return doneBy?.name ? (
+        <Tag color="green">
+          {doneBy.name}
+        </Tag>
+      ) : (
+        <Tag color="orange">
+          Pending
+        </Tag>
+      );
+    },
+  },
+  {
+    title: "Cancel",
+    key: "cancel",
+
+    render: (_, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: { colSpan: 0 },
+        };
+      }
+
+      if (record.status !== "PENDING") {
+        return "-";
+      }
+
+      return (
+        <Popconfirm
+          title="Cancel Leave Request"
+          description="Are you sure you want to cancel this request?"
+          okText="Yes"
+          cancelText="No"
+          onConfirm={async () => {
+
+            const result =
+              await cancelRequest(record._id);
+
+            if (result.status === "SUCCESS") {
+
+              message.success(result.message);
+
+              // 👇 gọi lại từ parent
+              fetchDataUser();
+
+            } else {
+              message.error(result.message);
+            }
+          }}
+        >
+          <Button danger size="small">
+            Cancel
+          </Button>
+        </Popconfirm>
+      );
     },
   }
 ];

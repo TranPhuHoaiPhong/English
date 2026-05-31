@@ -482,6 +482,67 @@ const createLeaveRequestService = async (data) => {
   };
 };
 
+const cancelLeaveRequestService = async (id) => {
+  try {
+
+    const leaveRequest =
+      await LeaveRequest.findById(id);
+
+    if (!leaveRequest) {
+      return {
+        status: "ERROR",
+        message: "Leave request not found"
+      };
+    }
+
+    // chỉ cho hủy đơn pending
+    if (leaveRequest.status !== "PENDING") {
+      return {
+        status: "ERROR",
+        message: "Only pending requests can be cancelled"
+      };
+    }
+
+    // kiểm tra 24 giờ
+    const createdAt =
+      new Date(leaveRequest.createdAt);
+
+    const now = new Date();
+
+    const diffHours =
+      (now - createdAt) /
+      (1000 * 60 * 60);
+
+    if (diffHours > 24) {
+      return {
+        status: "ERROR",
+        message:
+          "Cancellation period exceeded 24 hours"
+      };
+    }
+
+    leaveRequest.status =
+      "CANCELLED";
+
+    await leaveRequest.save();
+
+    return {
+      status: "SUCCESS",
+      message:
+        "Leave request cancelled successfully"
+    };
+
+  } catch (error) {
+
+    return {
+      status: "ERROR",
+      message: error.message
+    };
+
+  }
+};
+
 module.exports = {
-  createLeaveRequestService
+  createLeaveRequestService,
+  cancelLeaveRequestService
 };

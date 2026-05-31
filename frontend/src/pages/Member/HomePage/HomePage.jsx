@@ -275,7 +275,7 @@ function HomePage() {
         >
           <Table
             rowKey="_id"
-            columns={requestColumns}
+            columns={requestColumns(fetchDataUser)}
             dataSource={groupedData}
             pagination={false}
           />

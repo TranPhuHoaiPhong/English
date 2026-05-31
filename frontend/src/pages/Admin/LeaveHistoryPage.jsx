@@ -89,47 +89,34 @@ function LeaveHistoryPage() {
 
   // ===== filter =====
 
-  const filteredData = data.filter((item) => {
+const filteredData = [...data]
+  .sort((a, b) => 
+    new Date(b.createdAt) - new Date(a.createdAt)
+  )
+  .filter((item) => {
 
-      const matchType =
-        typeFilter === "ALL"
-        ||
-        item.leaveType ===
-          typeFilter;
+    const matchType =
+      typeFilter === "ALL" ||
+      item.leaveType === typeFilter;
 
-      const matchStatus =
-        statusFilter ===
-          "ALL"
-        ||
-        item.status ===
-          statusFilter;
+    const matchStatus =
+      statusFilter === "ALL" ||
+      item.status === statusFilter;
 
-      const keyword =
-        removeVietnameseTones(
-          searchText.toLowerCase()
-        );
+    const keyword = removeVietnameseTones(
+      searchText.toLowerCase()
+    );
 
-      const matchSearch =
-        removeVietnameseTones(
-          (
-            item.employeeName ||
-            ""
-          ).toLowerCase()
-        ).includes(keyword)
-        ||
-        removeVietnameseTones(
-          (
-            item.employeeCode ||
-            ""
-          ).toLowerCase()
-        ).includes(keyword);
+    const matchSearch =
+      removeVietnameseTones(
+        (item.employeeName || "").toLowerCase()
+      ).includes(keyword) ||
+      removeVietnameseTones(
+        (item.employeeCode || "").toLowerCase()
+      ).includes(keyword);
 
-      return (
-        matchType &&
-        matchStatus &&
-        matchSearch
-      );
-    });
+    return matchType && matchStatus && matchSearch;
+  });
 
   // ===== type color =====
 

@@ -5,6 +5,7 @@ const {
   generateAccessToken,
   generateRefreshToken
 } = require("../JwtService/JwtService");
+const {sendMail} = require("../../util/sendMail")
 
 const getEmployeeService = async (id) => {
 
@@ -142,8 +143,130 @@ const changePasswordEmployeesSer = async (id, password) => {
     }
 };
 
+const resetPasswordEmployeesSer = async (gmail) => {
+  try {
+
+    const employee = await Employee.findOne({
+      email: gmail
+    });
+
+    if (!employee) {
+      return {
+        status: "ERROR",
+        message: "Employee not found"
+      };
+    }
+
+    // tạo mật khẩu ngẫu nhiên 6 số
+    const newPassword = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    // hash password
+    const hashedPassword =
+      await bcrypt.hash(newPassword, 10);
+
+    // cập nhật mật khẩu
+    employee.password = hashedPassword;
+
+    await employee.save();
+
+    // gửi mail
+    await sendMail({
+      to: employee.email,
+      subject: "Reset Password",
+      html: `
+        <div
+          style="
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: auto;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+          "
+        >
+
+          <div
+            style="
+              background: #1677ff;
+              color: white;
+              padding: 20px;
+              text-align: center;
+            "
+          >
+            <h1 style="margin:0">
+              Password Reset
+            </h1>
+          </div>
+
+          <div style="padding:24px">
+
+            <p>
+              Hello
+              <b>${employee.name}</b>,
+            </p>
+
+            <p>
+              Your password has been reset successfully.
+            </p>
+
+            <p>
+              Your temporary password is:
+            </p>
+
+            <div
+              style="
+                background:#f5f5f5;
+                padding:20px;
+                text-align:center;
+                font-size:28px;
+                font-weight:bold;
+                letter-spacing:5px;
+                border-radius:8px;
+              "
+            >
+              ${newPassword}
+            </div>
+
+            <p
+              style="
+                margin-top:20px;
+                color:red;
+              "
+            >
+              Please login and change your password immediately.
+            </p>
+
+            <p>
+              Thank you.
+            </p>
+
+          </div>
+
+        </div>
+      `
+    });
+
+    return {
+      status: "SUCCESS",
+      message:
+        "New password has been sent to email"
+    };
+
+  } catch (error) {
+
+    return {
+      status: "ERROR",
+      message: error.message
+    };
+
+  }
+};
+
 module.exports = {
   loginEmployeeService,
   getEmployeeService,
-  changePasswordEmployeesSer
+  changePasswordEmployeesSer,
+  resetPasswordEmployeesSer
 };

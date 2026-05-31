@@ -132,9 +132,32 @@ const changePasswordEmployees = async (req, res) => {
   }
 };
 
+const resetPasswordEmployees = async (req, res) => {
+  try {
+    const {gmail} = req.body;
+    console.log("gmail", gmail);
+
+    const result = await EmployeeService.resetPasswordEmployeesSer(gmail);
+
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(201).json(result);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error",
+    });
+  }
+};
+
 module.exports = {
   loginEmployee,
   getEmployees,
   logoutEmployee,
-  changePasswordEmployees
+  changePasswordEmployees,
+  resetPasswordEmployees
 };

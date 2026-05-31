@@ -28,7 +28,27 @@ const createLeaveRequest = async (req, res) => {
   }
 };
 
+const cancelLeaveRequest = async (req, res) => {
+  try {
+    const id = req.params.id
+    const result = await LeaveService.cancelLeaveRequestService(id);
+
+    if (result.status === "ERROR") {
+      return res.status(400).json(result);
+    }
+
+    return res.status(201).json(result);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Server error"
+    });
+  }
+};
 
 module.exports = {
   createLeaveRequest,
+  cancelLeaveRequest
 };
