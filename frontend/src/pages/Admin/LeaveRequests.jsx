@@ -99,10 +99,10 @@ function LeavePage() {
 
   // ===== approve =====
 
-  const handleApprove = async (id, employeeId) => {
+  const handleApprove = async (id) => {
       try {
         setActionLoading(true);
-        await ApproveLeaveRequest(id, employeeId);
+        await ApproveLeaveRequest(id);
 
         message.success(
           "Approved successfully"

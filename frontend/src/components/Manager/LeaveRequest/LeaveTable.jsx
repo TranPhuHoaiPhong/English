@@ -17,7 +17,6 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function LeaveTable({
   filteredData,
-  handleOpenDetail,
   handleApprove,
   handleReject
 }) {
@@ -214,7 +213,7 @@ function LeaveTable({
     {
       title: "Action",
 
-      width: 320,
+      width: 220,
 
       fixed: "right",
 
@@ -238,25 +237,16 @@ function LeaveTable({
           </Popconfirm>
 
           <Button
-  danger
-  onClick={() => {
+            danger
+            onClick={() => {
 
-    setSelectedId(r._id);
+              setSelectedId(r._id);
 
-    setRejectOpen(true);
-  }}
->
-  Reject
-</Button>
-
-          <Button
-            onClick={() =>
-              handleOpenDetail(r)
-            }
+              setRejectOpen(true);
+            }}
           >
-            Detail
+            Reject
           </Button>
-
         </Space>
       )
     }
@@ -342,57 +332,57 @@ function LeaveTable({
       />
 
       <Modal
-  open={rejectOpen}
+        open={rejectOpen}
 
-  title="Reject Leave Request"
+        title="Reject Leave Request"
 
-  okText="Reject"
+        okText="Reject"
 
-  cancelText="Cancel"
+        cancelText="Cancel"
 
-  okButtonProps={{
-    danger: true
-  }}
+        okButtonProps={{
+          danger: true
+        }}
 
-  onCancel={() => {
+        onCancel={() => {
 
-    setRejectOpen(false);
+          setRejectOpen(false);
 
-    setRejectReason("");
+          setRejectReason("");
 
-    setSelectedId(null);
-  }}
+          setSelectedId(null);
+        }}
 
-  onOk={() => {
+        onOk={() => {
 
-    handleReject(
-      selectedId,
-      rejectReason
-    );
+          handleReject(
+            selectedId,
+            rejectReason
+          );
 
-    setRejectOpen(false);
+          setRejectOpen(false);
 
-    setRejectReason("");
+          setRejectReason("");
 
-    setSelectedId(null);
-  }}
->
+          setSelectedId(null);
+          }}
+        >
 
-  <Input.TextArea
-    rows={4}
+          <Input.TextArea
+            rows={4}
 
-    placeholder="Enter reject reason..."
+            placeholder="Enter reject reason..."
 
-    value={rejectReason}
+            value={rejectReason}
 
-    onChange={(e) =>
-      setRejectReason(
-        e.target.value
-      )
-    }
-  />
+            onChange={(e) =>
+              setRejectReason(
+                e.target.value
+              )
+            }
+          />
 
-</Modal>
+        </Modal>
 
     </>
   );

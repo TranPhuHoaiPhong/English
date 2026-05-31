@@ -4,288 +4,67 @@ const CompanyHoliday = require("../../models/CompanyHoliday");
 
 const { sendMail } = require("../../util/sendMail");
 
-const createLeaveRequestService = async (data) => {
+const getLeaveRequestsService = async (userId) => {
+  try {
 
-  const { employeeId, leaveType, startDate, endDate, reason, medicalProof } = data;
+    // tìm manager hiện tại
+    const manager = await Employee.findById(userId);
 
-  // ===== validate =====
+    if (!manager) {
+      return {
+        status: "ERROR",
+        message: "Manager not found"
+      };
+    }
 
-  if (
-    !employeeId ||
-    !leaveType ||
-    !startDate ||
-    !endDate
-  ) {
+    // lấy tất cả employee cùng phòng ban
+    const employees = await Employee.find({
+      department: manager.department
+    }).select("_id");
 
-    return {
-      status: "ERROR",
-      message:
-        "Missing required fields"
-    };
-  }
-
-  const start = new Date(startDate + "T00:00:00");
-
-  const end = new Date(endDate + "T00:00:00");
-
-  // reset time
-  start.setHours(0, 0, 0, 0);
-  end.setHours(0, 0, 0, 0);
-
-  if (start > end) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Start date must be before end date"
-    };
-  }
-
-  // ===== employee =====
-
-  const employee =
-    await Employee.findById(
-      employeeId
+    // lấy danh sách id nhân viên
+    const employeeIds = employees.map(
+      item => item._id
     );
 
-  if (!employee) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Employee not found"
-    };
-  }
-
-  // ===== tính ngày nghỉ =====
-
-  let totalDays = 0;
-
-  const current =
-    new Date(start);
-
-  while (current <= end) {
-
-    const currentDate =
-      new Date(current);
-
-    currentDate.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    // sunday
-    const isSunday =
-      currentDate.getDay() === 0;
-
-    // start of day
-    const startOfDay =
-      new Date(currentDate);
-
-    startOfDay.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    // end of day
-    const endOfDay =
-      new Date(currentDate);
-
-    endOfDay.setHours(
-      23,
-      59,
-      59,
-      999
-    );
-
-    // holiday
-    const holiday = await CompanyHoliday.findOne({
-        startDate: {
-          $lte: endOfDay
+    // tìm leave request
+    const leaveRequests =
+      await LeaveRequest.find({
+        employeeId: {
+          $in: employeeIds
         },
 
-        endDate: {
-          $gte: startOfDay
-        }
-      }).lean();
+        status: "PENDING"
+      })
 
-    if (
-      !isSunday &&
-      !holiday
-    ) {
+      .populate("employeeId")
 
-      totalDays++;
-    }
-
-    // next day
-    current.setDate(
-      current.getDate() + 1
-    );
-  }
-
-  // ===== check total =====
-
-  if (totalDays <= 0) {
+      .sort({
+        createdAt: -1
+      });
 
     return {
-      status: "ERROR",
-      message:
-        "Selected dates are all holidays or Sundays"
+      status: "SUCCESS",
+      data: leaveRequests
     };
+
+  } catch (error) {
+    throw error;
   }
-
-  // ===== paid leave =====
-
-  const paidLeaveTypes = [
-
-    "ANNUAL",
-
-    "MARRIAGE",
-
-    "CHILD_MARRIAGE",
-
-    "FUNERAL",
-
-    "MILITARY_EXAM",
-
-    "WORK_ACCIDENT",
-
-    "FOREIGN_VISIT"
-  ];
-
-  const isPaidLeave =
-    paidLeaveTypes.includes(
-      leaveType
-    );
-
-  // ===== annual leave =====
-
-  if (
-    leaveType ===
-    "ANNUAL"
-  ) {
-
-    if (
-      employee.leaveBalance <
-      totalDays
-    ) {
-
-      return {
-        status: "ERROR",
-        message:
-          "Not enough leave balance"
-      };
-    }
-
-    // trừ phép
-
-    employee.leaveBalance -=
-      totalDays;
-
-    await employee.save();
-  }
-
-  // ===== sick leave =====
-
-  if (
-    leaveType === "SICK" &&
-    !medicalProof
-  ) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Medical proof is required for sick leave"
-    };
-  }
-
-  // ===== check overlap leave request =====
-
-  const existedLeave =
-    await LeaveRequest.findOne({
-
-      employeeId,
-
-      // bỏ đơn bị từ chối
-      status: {
-        $ne: "REJECTED"
-      },
-
-      // kiểm tra bị đè ngày
-      startDate: {
-        $lte: end
-      },
-
-      endDate: {
-        $gte: start
-      }
-
-    });
-
-    if (existedLeave) {
-      return {
-        status: "ERROR",
-        message:
-          "Leave request dates overlap with another leave request"
-      };
-    }
-
-  // ===== create =====
-
-  const newLeaveRequest =
-    await LeaveRequest.create({
-
-      employeeId,
-
-      // thêm code + name
-
-      employeeCode:
-        employee.code,
-
-      employeeName:
-        employee.name,
-
-      leaveType,
-
-      startDate,
-
-      endDate,
-
-      totalDays,
-
-      reason,
-
-      isPaidLeave,
-
-      medicalProof:
-
-        leaveType ===
-        "SICK"
-
-          ? medicalProof
-
-          : null
-    });
-
-  return {
-
-    status: "SUCCESS",
-
-    data: newLeaveRequest
-  };
 };
 
-const getLeaveRequestsService = async () => {
-  const leaverequests = await LeaveRequest
-    .find({
-      status: "PENDING"
-    })
-    .sort({
-      createdAt: -1
+const getHistoryLeaveRequestsService = async (managerId) => {
+
+  const leaverequests =
+    await LeaveRequest.find({
+      status: {
+        $in: [
+          "APPROVED",
+          "REJECTED",
+          "CANCELLED"
+        ]
+      },
+      doneBy: managerId
     });
 
   return {
@@ -294,366 +73,13 @@ const getLeaveRequestsService = async () => {
   };
 };
 
-const getHistoryLeaveRequestsService = async () => {
-
-    const leaverequests = await LeaveRequest
-      .find({
-        status: {
-          $in: [
-            "APPROVED",
-            "REJECTED",
-            "CANCELLED"
-          ]
-        }
-      })
-      .populate(
-        "doneBy",
-        "name"
-      );
-
-    return {
-      status: "SUCCESS",
-      data: leaverequests
-    };
-};
-
-const updateLeaveRequestService = async (
-  id,
-  data
-) => {
-
-  const {
-    employeeId,
-    leaveType,
-    startDate,
-    endDate,
-    reason,
-    medicalProof
-  } = data;
-
-  // ===== validate =====
-
-  if (
-    !employeeId ||
-    !leaveType ||
-    !startDate ||
-    !endDate
-  ) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Missing required fields"
-    };
-  }
-
-  // ===== find request =====
-
-  const leaveRequest =
-    await LeaveRequest.findById(id);
-
-  if (!leaveRequest) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Leave request not found"
-    };
-  }
-
-  // ===== employee =====
-
-  const employee =
-    await Employee.findById(
-      employeeId
-    );
-
-  if (!employee) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Employee not found"
-    };
-  }
-
-  // ===== date =====
-
-  const start =
-    new Date(
-      startDate +
-      "T00:00:00"
-    );
-
-  const end =
-    new Date(
-      endDate +
-      "T00:00:00"
-    );
-
-  start.setHours(
-    0, 0, 0, 0
-  );
-
-  end.setHours(
-    0, 0, 0, 0
-  );
-
-  if (start > end) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Start date must be before end date"
-    };
-  }
-
-  // ===== calculate total =====
-
-  let totalDays = 0;
-
-  const current =
-    new Date(start);
-
-  while (current <= end) {
-
-    const currentDate =
-      new Date(current);
-
-    currentDate.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    const isSunday =
-      currentDate.getDay() === 0;
-
-    const startOfDay =
-      new Date(currentDate);
-
-    startOfDay.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    const endOfDay =
-      new Date(currentDate);
-
-    endOfDay.setHours(
-      23,
-      59,
-      59,
-      999
-    );
-
-    const holiday =
-      await CompanyHoliday.findOne({
-
-        startDate: {
-          $lte: endOfDay
-        },
-
-        endDate: {
-          $gte: startOfDay
-        }
-
-      }).lean();
-
-    if (
-      !isSunday &&
-      !holiday
-    ) {
-
-      totalDays++;
-    }
-
-    current.setDate(
-      current.getDate() + 1
-    );
-  }
-
-  // ===== validate total =====
-
-  if (totalDays <= 0) {
-
-    return {
-      status: "ERROR",
-      message:
-        "Selected dates are all holidays or Sundays"
-    };
-  }
-
-  // ===== paid leave =====
-
-  const paidLeaveTypes = [
-
-    "ANNUAL",
-
-    "MARRIAGE",
-
-    "CHILD_MARRIAGE",
-
-    "FUNERAL",
-
-    "MILITARY_EXAM",
-
-    "WORK_ACCIDENT",
-
-    "FOREIGN_VISIT"
-  ];
-
-  const isPaidLeave =
-    paidLeaveTypes.includes(
-      leaveType
-    );
-
-  // ===== annual leave =====
-
-  if (
-    leaveType ===
-    "ANNUAL"
-  ) {
-
-    // hoàn phép cũ trước
-
-    if (
-      leaveRequest.leaveType ===
-      "ANNUAL"
-    ) {
-
-      employee.leaveBalance +=
-        leaveRequest.totalDays;
-    }
-
-    // check lại
-
-    if (
-      employee.leaveBalance <
-      totalDays
-    ) {
-
-      return {
-        status: "ERROR",
-        message:
-          "Not enough leave balance"
-      };
-    }
-
-    // trừ phép mới
-
-    employee.leaveBalance -=
-      totalDays;
-
-    await employee.save();
-  }
-
-  // ===== sick leave =====
-
-  if (
-    leaveType === "SICK"
-  ) {
-
-    // nếu update mà không upload mới
-    // thì giữ file cũ
-
-    if (
-      !medicalProof &&
-      !leaveRequest.medicalProof
-    ) {
-
-      return {
-        status: "ERROR",
-        message:
-          "Medical proof is required for sick leave"
-      };
-    }
-  }
-
-  // ===== update =====
-
-  leaveRequest.employeeId =
-    employeeId;
-
-  leaveRequest.employeeCode =
-    employee.code;
-
-  leaveRequest.employeeName =
-    employee.name;
-
-  leaveRequest.leaveType =
-    leaveType;
-
-  leaveRequest.startDate =
-    startDate;
-
-  leaveRequest.endDate =
-    endDate;
-
-  leaveRequest.totalDays =
-    totalDays;
-
-  leaveRequest.reason =
-    reason;
-
-  leaveRequest.isPaidLeave =
-    isPaidLeave;
-
-  // giữ file cũ nếu không upload mới
-
-  if (
-    leaveType === "SICK"
-  ) {
-
-    leaveRequest.medicalProof =
-      medicalProof ||
-
-      leaveRequest.medicalProof;
-
-  } else {
-
-    leaveRequest.medicalProof =
-      null;
-  }
-
-  await leaveRequest.save();
-
-  return {
-
-    status: "SUCCESS",
-
-    data: leaveRequest
-  };
-};
-
-const deleteLeaveRequestService = async (id) => {
-    const leaveRequest = await LeaveRequest.findById(id);
-
-    if (!leaveRequest) {
-      return {
-        status: "ERROR",
-        message: "Leave request not found"
-      };
-    }
-
-    await LeaveRequest.findByIdAndDelete(id);
-
-    return {
-      status: "SUCCESS",
-      message: "Delete leave request success"
-    };
-};
-
 const approveLeaveRequestService = async (
   id,
-  userId
+  managerId
 ) => {
 
   try {
-
+    console.log("managerId", managerId)
     const leaveRequest =
       await LeaveRequest.findById(id);
 
@@ -692,10 +118,8 @@ const approveLeaveRequestService = async (
     }
 
     // Update status
-    leaveRequest.status =
-      "APPROVED";
-      
-    leaveRequest.doneBy = userId;
+    leaveRequest.status = "APPROVED";
+    leaveRequest.doneBy = managerId;
 
     await leaveRequest.save();
 
@@ -961,7 +385,7 @@ const approveLeaveRequestService = async (
 const rejectLeaveRequestService = async (
   id,
   rejectReason,
-  userId
+  managerId
 ) => {
 
   try {
@@ -1004,7 +428,8 @@ const rejectLeaveRequestService = async (
     // update status
     leaveRequest.status =
       "REJECTED";
-    leaveRequest.doneBy = userId;
+    leaveRequest.doneBy =
+      managerId;
 
     await leaveRequest.save();
 
@@ -1270,10 +695,7 @@ const rejectLeaveRequestService = async (
 
 
 module.exports = {
-  createLeaveRequestService,
   getLeaveRequestsService,
-  updateLeaveRequestService,
-  deleteLeaveRequestService,
   approveLeaveRequestService,
   rejectLeaveRequestService,
   getHistoryLeaveRequestsService

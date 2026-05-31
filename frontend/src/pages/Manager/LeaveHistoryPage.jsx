@@ -9,13 +9,13 @@ import {
   Spin
 } from "antd";
 import { useEffect, useState } from "react";
-import { getHistoryLeaveRequest } from "../../services/Admin/HistoryRequest/HistoryRequest";
+import { getHistoryLeaveRequest } from "../../services/Manager/HistoryRequest/HistoryRequest";
 
 const { Option } = Select;
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-function LeaveHistoryPage() {
+function LeaveHistoryManagerPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -329,32 +329,19 @@ function LeaveHistoryPage() {
 
   {
     title: "Created At",
-
     width: 180,
-
     render: (_, r) =>
-
-      new Date(
-        r.createdAt
-      ).toLocaleString()
-  },
-  {
-    title: "Done By",
-    dataIndex: "doneBy",
-    key: "doneBy",
-
-    render: (doneBy, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
-
-      return doneBy?.name || "-";
-    },
+      new Date(r.createdAt).toLocaleString(
+        "en-US",
+        {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        }
+      )
   }
 ];
 
@@ -480,9 +467,9 @@ function LeaveHistoryPage() {
           filteredData
         }
 
-        pagination={{
-          pageSize: 10
-        }}
+        pagination={
+          false
+        }
 
         tableLayout="fixed"
 
@@ -497,4 +484,4 @@ function LeaveHistoryPage() {
   );
 }
 
-export default LeaveHistoryPage;
+export default LeaveHistoryManagerPage;

@@ -71,6 +71,40 @@ const createLeaveRequestService = async (data) => {
     };
   }
 
+  // ===== check overlap leave request =====
+
+  const existedLeave =
+    await LeaveRequest.findOne({
+
+      employeeId,
+
+      // bỏ các đơn bị từ chối
+      status: {
+        $ne: "REJECTED"
+      },
+
+      // kiểm tra khoảng ngày bị đè
+      startDate: {
+        $lte: end
+      },
+
+      endDate: {
+        $gte: start
+      }
+
+    });
+
+  if (existedLeave) {
+
+    return {
+
+      status: "ERROR",
+
+      message:
+        "Leave request dates overlap with another leave request"
+    };
+  }
+
   // ===== tính ngày nghỉ =====
 
   let totalDays = 0;

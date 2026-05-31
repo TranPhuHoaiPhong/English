@@ -72,15 +72,12 @@ const LeaveRequestSchema = new mongoose.Schema({
       uploadedAt: Date
     },
 
-    approvedBy: {
+    doneBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee"
     },
-
-    approvedAt: Date,
-    
+    approvedAt: Date,   
     rejectedReason: String,
-
     note: String
 
   },

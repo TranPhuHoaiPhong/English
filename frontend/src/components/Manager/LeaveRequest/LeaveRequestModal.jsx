@@ -86,7 +86,7 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
 
       formData.append(
         "employeeId",
-        values.employeeId
+        values.employeeId.value
       );
 
       formData.append(
@@ -169,6 +169,7 @@ function LeaveRequestModal({ open, setOpen, leaveRequest, handleUpdate, handleDe
           ]}
         >
           <Select
+            labelInValue
             disabled={isEdit}
             placeholder="Select employee"
             style={{ width: "100%" }}

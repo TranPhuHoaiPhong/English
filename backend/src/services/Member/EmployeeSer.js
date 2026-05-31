@@ -26,6 +26,10 @@ const getEmployeeService = async (id) => {
         .find({
             employeeId: id
         })
+        .populate(
+            "doneBy",
+            "name email code"
+        )
         .sort({
             createdAt: -1
         });

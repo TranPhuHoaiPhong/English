@@ -1,55 +1,107 @@
 const CompanyHoliday = require("../../models/CompanyHoliday");
 
 const createHolidayService = async (data) => {
-    const {
-      name,
-      startDate,
-      endDate,
-      type,
-      isPaid,
-      description
-    } = data;
 
-    if (
-      !name ||
-      !startDate ||
-      !endDate
-    ) {
+  const {
+    name,
+    startDate,
+    endDate,
+    type,
+    isPaid,
+    description
+  } = data;
 
-      return {
-        status: "ERROR",
-        message:
-          "Missing required fields"
-      };
-    }
-
-    if (
-      new Date(startDate) >
-      new Date(endDate)
-    ) {
-
-      return {
-        status: "ERROR",
-        message:
-          "Start date must be before end date"
-      };
-    }
-
-    const newHoliday =
-      await CompanyHoliday
-        .create({
-          name,
-          startDate,
-          endDate,
-          type,
-          isPaid,
-          description 
-        });
+  if (
+    !name ||
+    !startDate ||
+    !endDate
+  ) {
 
     return {
-      status: "SUCCESS",
-      data: newHoliday
+      status: "ERROR",
+      message:
+        "Missing required fields"
     };
+  }
+
+  const start =
+    new Date(startDate);
+
+  const end =
+    new Date(endDate);
+
+  start.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  end.setHours(
+    23,
+    59,
+    59,
+    999
+  );
+
+  if (start > end) {
+
+    return {
+      status: "ERROR",
+      message:
+        "Start date must be before end date"
+    };
+  }
+
+  // ===== check overlap holiday =====
+
+  const existedHoliday =
+    await CompanyHoliday.findOne({
+
+      startDate: {
+        $lte: end
+      },
+
+      endDate: {
+        $gte: start
+      }
+    });
+
+  if (existedHoliday) {
+
+    return {
+
+      status: "ERROR",
+
+      message:
+        "Holiday already exists or overlaps with another holiday"
+    };
+  }
+
+  // ===== create =====
+
+  const newHoliday =
+    await CompanyHoliday.create({
+
+      name,
+
+      startDate,
+
+      endDate,
+
+      type,
+
+      isPaid,
+
+      description
+    });
+
+  return {
+
+    status: "SUCCESS",
+
+    data: newHoliday
+  };
 };
 
 const getAllHolidaysService = async () => {
@@ -65,8 +117,7 @@ const getAllHolidaysService = async () => {
     };
 };
 
-const updateHolidayService =
-  async (id, data) => {
+const updateHolidayService = async (id, data) => {
 
     const holiday =
       await CompanyHoliday
@@ -102,8 +153,7 @@ const updateHolidayService =
     };
 };
 
-const deleteHolidayService =
-  async (id) => {
+const deleteHolidayService = async (id) => {
 
     const holiday =
       await CompanyHoliday

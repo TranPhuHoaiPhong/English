@@ -102,9 +102,46 @@ const authUserApp = (req, res, next) => {
   });
 };
 
+const managerMiddleware = (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({
+        status: "ERROR",
+        message: "Token không tồn tại",
+      });
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+      if (err) {
+        return res.status(403).json({
+          status: "ERROR",
+          message: "Token không hợp lệ",
+        });
+      }
+
+      if (decoded.role === "manager") {
+        req.user = decoded; // lưu thông tin user vào req để các middleware sau dùng
+        next();
+      } else {
+        return res.status(403).json({
+          status: "ERROR",
+          message: "Bạn không có quyền truy cập (chỉ dành cho Manager)",
+        });
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "ERROR",
+      message: "Lỗi xác thực",
+    });
+  }
+};
+
 
 module.exports = {
   authMiddleware, // chỉ cho admin
   authUserMiddleware, // cho admin hoặc chính user
   authUserApp, // xác thực cho app (member) qua token, lưu userId vào req.userId để controller dùng
+  managerMiddleware //Manager
 };

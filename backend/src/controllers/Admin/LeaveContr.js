@@ -125,10 +125,11 @@ const deleteLeaveRequest = async (req, res) => {
 
 const approveLeaveRequest = async (req, res) => {
   try {
+    const userId = req.user.id;
     const result =
       await LeaveService.approveLeaveRequestService(
         req.params.id,
-        req.params.employeeId
+        userId
       );
     if (result.status === "ERROR") {
       return res.status(400).json(result);
@@ -146,10 +147,11 @@ const approveLeaveRequest = async (req, res) => {
 const rejectLeaveRequest = async (req, res) => {
   try {
     const { rejectReason } = req.body;
+    const userId = req.user.id;
     const result = await LeaveService.rejectLeaveRequestService(
         req.params.id,
-        req.params.employeeId,
-        rejectReason
+        rejectReason,
+        userId
       );
     if (result.status === "ERROR") {
       return res.status(400).json(result);

@@ -213,4 +213,22 @@ export const requestColumns = [
       );
     },
   },
+  {
+    title: "Done By",
+    dataIndex: "doneBy",
+    key: "doneBy",
+
+    render: (doneBy, record) => {
+
+      if (record.isGroup) {
+        return {
+          props: {
+            colSpan: 0,
+          },
+        };
+      }
+
+      return doneBy?.name || "-";
+    },
+  }
 ];

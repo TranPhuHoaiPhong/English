@@ -28,10 +28,15 @@ export function useLogin() {
             if (data.role === "admin") {
                 setError("");
                 return "admin";
-            } else if (data.role === "employee" || data.role === "manager") {
+            } else if (data.role === "employee") {
                 setError("");
                 return "member";
-            } else {
+            } else if (data.role === "manager" ) {
+                setError("")
+                return "manager"
+            }
+            
+            else {
                 setError("Unknown user role.");
                 return false;
             }

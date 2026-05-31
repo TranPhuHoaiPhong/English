@@ -10,6 +10,11 @@ import EmployeePage from "./pages/Admin/Employee";
 import LeavePage from "./pages/Admin/LeaveRequests";
 import LeaveHistoryPage from "./pages/Admin/LeaveHistoryPage";
 
+import DashboardManager from "./pages/Manager/Dashboard"
+import LeaveManagerPage from "./pages/Manager/LeaveRequests"
+import LeaveHistoryManagerPage from "./pages/Manager/LeaveHistoryPage"
+
+
 function App() {
   return (
     <Router>
@@ -26,6 +31,15 @@ function App() {
           <Route path="employee" element={<EmployeePage />} />
           <Route path="leaverequests" element={<LeavePage />} />
           <Route path="leavehistory" element={<LeaveHistoryPage />} />
+        </Route>
+ 
+        <Route path="/manager" element={<DashboardManager />}>
+          
+          {/* 👇 mấy cái này render vào Outlet */}
+          {/* <Route path="admin" element={<AdminDashboard />} />
+          <Route path="employee" element={<EmployeePage />} /> */}
+          <Route path="leaverequests" element={<LeaveManagerPage />} />
+          <Route path="leavehistory" element={<LeaveHistoryManagerPage />} />
         </Route>
 
         {/* 404 */}

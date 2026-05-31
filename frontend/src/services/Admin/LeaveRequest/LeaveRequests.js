@@ -109,14 +109,14 @@ export const deleteLeaveRequest = async (id) => {
 };
 
 // ===== APPROVE =====
-export const ApproveLeaveRequest = async (id, employeeId) => {
+export const ApproveLeaveRequest = async (id) => {
     const accessToken =
       localStorage.getItem(
         "accessToken"
       );
     const res =
       await axios.put(   
-        `${API_URL}/api/admin/leaverequest/${id}/approve/${employeeId}`,
+        `${API_URL}/api/admin/leaverequest/${id}/approve`,
         {
           status: "APPROVED"
         },

@@ -35,6 +35,8 @@ function LoginPage() {
       navigate("/home");
     } else if (role === "admin") {
       navigate("/dashboard/admin");
+    } else if (role === "manager") {
+      navigate("/manager/leaverequests")
     }
   };
 
