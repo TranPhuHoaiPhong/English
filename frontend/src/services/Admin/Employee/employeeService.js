@@ -99,8 +99,7 @@ export const deleteEmployee = async (id) => {
   return res.data;
 };
 
-export const logoutEmployee =
-  async () => {
+export const logoutEmployee = async () => {
 
     const accessToken =
       localStorage.getItem(

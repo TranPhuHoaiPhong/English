@@ -5,6 +5,8 @@ const { Option } = Select;
 function EmployeeFilter({
   roleFilter,
   setRoleFilter,
+  statusFilter,
+  setStatusFilter,
   searchText,
   setSearchText,
   openModal
@@ -27,6 +29,16 @@ function EmployeeFilter({
           <Option value="employee">Employee</Option>
           <Option value="manager">Manager</Option>
           <Option value="admin">Admin</Option>
+        </Select>
+
+        <Select
+          value={statusFilter}
+          onChange={setStatusFilter}
+          style={{ width: 160, marginRight: 10 }}
+        >
+          <Option value="ACTIVE">Active</Option>
+          <Option value="INACTIVE">Inactive</Option>
+          <Option value="ALL">All</Option>
         </Select>
 
         <Input

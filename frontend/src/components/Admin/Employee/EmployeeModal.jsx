@@ -10,18 +10,12 @@ import { useEffect } from "react";
 const { Option } = Select;
 
 function EmployeeModal({
-
   isModalOpen,
   setIsModalOpen,
-
   handleSubmit,
-
   editingEmployee,
-
   form,
-
   departments
-
 }) {
 
   // 📌 set data khi edit
@@ -191,25 +185,21 @@ function EmployeeModal({
         </Form.Item>
 
         {/* 📌 Password */}
-        <Form.Item
-          name="password"
-          label="Password"
-
-          rules={[
-
-            // 📌 chỉ required khi add
-            {
-              required:
-                !editingEmployee,
-
-              message:
-                "Password is required"
-            }
-
-          ]}
-        >
-          <Input.Password />
-        </Form.Item>
+        {/* 📌 Password */}
+        {!editingEmployee && (
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[
+              {
+                required: true,
+                message: "Password is required",
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+        )}
 
       </Form>
 

@@ -25,6 +25,11 @@ export function useLogin() {
 
             localStorage.setItem("accessToken", data.accessToken);
 
+            if (data.status === "INACTIVE") {
+                setError("Your account is inactive. Please contact admin.");
+                return false;
+            }
+
             if (data.role === "admin") {
                 setError("");
                 return "admin";
@@ -35,6 +40,7 @@ export function useLogin() {
                 setError("")
                 return "manager"
             }
+
             
             else {
                 setError("Unknown user role.");

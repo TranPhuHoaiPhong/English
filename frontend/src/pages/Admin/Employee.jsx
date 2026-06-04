@@ -27,6 +27,8 @@ function EmployeePage() {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [statusFilter, setStatusFilter] = useState("ACTIVE");
+
   useEffect(() => {
 
     const fetchData = async () => {
@@ -74,35 +76,32 @@ function EmployeePage() {
     employee: 3
   };
   
-  const filteredData = data
-    .filter((item) => {
-      const matchRole =
-        roleFilter === "ALL" ||
-        item.role === roleFilter;
+  const filteredData = data.filter((e) => {
+    const roleMatch =
+      roleFilter === "ALL" ||
+      e.role === roleFilter;
 
-      const keyword = removeVietnameseTones(
-        searchText.toLowerCase()
-      );
+    const statusMatch =
+      statusFilter === "ALL" ||
+      e.status === statusFilter;
 
-      const matchSearch =
-        removeVietnameseTones(
-          item.name.toLowerCase()
-        ).includes(keyword) ||
-        item.email.toLowerCase().includes(keyword) ||
-        item.code.toLowerCase().includes(keyword) ||
-        (item.phone || "").includes(keyword);
+    const searchMatch =
+      e.name
+        .toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      e.email
+        .toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      e.code
+        .toLowerCase()
+        .includes(searchText.toLowerCase());
 
-      return matchRole && matchSearch;
-    })
-
-    .sort((a, b) => {
-      if (roleFilter !== "ALL") return 0;
-
-      return (
-        (rolePriority[a.role] || 99) -
-        (rolePriority[b.role] || 99)
-      );
-    });
+    return (
+      roleMatch &&
+      statusMatch &&
+      searchMatch
+    );
+  });
 
   const openModal = (record = null) => {
     setEditingEmployee(record);
@@ -136,6 +135,10 @@ function EmployeePage() {
 
           message.success("Added successfully");
 
+          await fetchEmployees();
+
+          setIsModalOpen(false);
+
         } catch (error) {
         
           message.error(
@@ -143,10 +146,6 @@ function EmployeePage() {
           );
         }
       }
-
-      await fetchEmployees();
-
-      setIsModalOpen(false);
 
     } catch (error) {
 
@@ -185,6 +184,8 @@ function EmployeePage() {
           <EmployeeFilter
             roleFilter={roleFilter}
             setRoleFilter={setRoleFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
             searchText={searchText}
             setSearchText={setSearchText}
             openModal={openModal}

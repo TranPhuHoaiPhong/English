@@ -6,8 +6,20 @@ import {
   Space,
   Popover,
   Image,
-  Spin
+  Spin,
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Button,
+  Modal,
+  Descriptions,
+  DatePicker,
+  message
 } from "antd";
+
+import dayjs from "dayjs";
+import * as XLSX from "xlsx";
 import { useEffect, useState } from "react";
 import { getHistoryLeaveRequest } from "../../services/Admin/HistoryRequest/HistoryRequest";
 
@@ -18,6 +30,10 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 function LeaveHistoryPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [topLimit, setTopLimit] = useState(5);
 
   const [
     statusFilter,
@@ -34,6 +50,64 @@ function LeaveHistoryPage() {
     setSearchText
   ] = useState("");
 
+  const totalRequests =
+    data.length;
+
+  const approvedCount =
+    data.filter(
+      x => x.status === "APPROVED"
+    ).length;
+
+  const rejectedCount =
+    data.filter(
+      x => x.status === "REJECTED"
+    ).length;
+
+  const cancelledCount =
+    data.filter(
+      x => x.status === "CANCELLED"
+    ).length;
+
+  const totalLeaveDays =
+    data.reduce(
+      (sum, item) =>
+        sum + item.totalDays,
+      0
+    );
+
+  const topEmployees = Object.values(
+    data.reduce(
+      (acc, item) => {
+
+        if (
+          !acc[item.employeeCode]
+        ) {
+
+          acc[item.employeeCode] = {
+            code:
+              item.employeeCode,
+
+            name:
+              item.employeeName,
+
+            days: 0
+          };
+        }
+
+        acc[item.employeeCode].days +=
+          item.totalDays;
+
+        return acc;
+      },
+      {}
+    )
+  )
+    .sort(
+      (a, b) =>
+        b.days - a.days
+    )
+    .slice(0, topLimit);
+    
 
   const fetchLeaveRequests = async () => {
     try {
@@ -114,9 +188,93 @@ const filteredData = [...data]
       removeVietnameseTones(
         (item.employeeCode || "").toLowerCase()
       ).includes(keyword);
+    
+    let matchDate = true;
 
-    return matchType && matchStatus && matchSearch;
+    if (
+      dateRange &&
+      dateRange.length === 2
+    ) {
+
+      const leaveDate =
+        dayjs(item.startDate)
+          .format("YYYY-MM-DD");
+
+      const start =
+        dateRange[0]
+          .format("YYYY-MM-DD");
+
+      const end =
+        dateRange[1]
+          .format("YYYY-MM-DD");
+
+      matchDate =
+        leaveDate >= start &&
+        leaveDate <= end;
+    }
+
+    return (
+      matchType &&
+      matchStatus &&
+      matchSearch &&
+      matchDate
+    );
   });
+
+  const exportExcel = () => {
+
+  const exportData =
+      filteredData.map(
+        item => ({
+          Code:
+            item.employeeCode,
+
+          Name:
+            item.employeeName,
+
+          LeaveType:
+            item.leaveType,
+
+          Status:
+            item.status,
+
+          Days:
+            item.totalDays,
+
+          StartDate:
+            new Date(
+              item.startDate
+            ).toLocaleDateString(),
+
+          EndDate:
+            new Date(
+              item.endDate
+            ).toLocaleDateString(),
+
+          Reason:
+            item.reason
+        })
+      );
+
+    const ws =
+      XLSX.utils.json_to_sheet(
+        exportData
+      );
+
+    const wb =
+      XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      wb,
+      ws,
+      "LeaveHistory"
+    );
+
+    XLSX.writeFile(
+      wb,
+      "LeaveHistory.xlsx"
+    );
+  };
 
   // ===== type color =====
 
@@ -252,11 +410,11 @@ const filteredData = [...data]
 
       `${new Date(
         r.startDate
-      ).toLocaleDateString()}
-       →
-       ${new Date(
+      ).toLocaleDateString("vi-VN")}
+      →
+      ${new Date(
         r.endDate
-      ).toLocaleDateString()}`
+      ).toLocaleDateString("vi-VN")}`
   },
 
   {
@@ -323,7 +481,7 @@ const filteredData = [...data]
 
       new Date(
         r.createdAt
-      ).toLocaleString()
+      ).toLocaleDateString("vi-VN")
   },
   {
     title: "Done By",
@@ -342,145 +500,381 @@ const filteredData = [...data]
 
       return doneBy?.name || "-";
     },
+  },
+  {
+    title: "Action",
+    width: 100,
+
+    render: (_, record) => (
+
+      <Button
+        onClick={() => {
+
+          setSelectedRecord(
+            record
+          );
+
+          setDetailOpen(
+            true
+          );
+        }}
+      >
+        View
+      </Button>
+    )
   }
 ];
 
   return (
     <Spin spinning={loading} size="large">
       <div>
+      
+      <Row
+        gutter={16}
+        justify="center"
+        style={{
+          marginBottom: 20
+        }}
+      >
 
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="Approved"
+              value={approvedCount}
+            />
+          </Card>
+        </Col>
+
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="Rejected"
+              value={rejectedCount}
+            />
+          </Card>
+        </Col>
+
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="Cancelled"
+              value={cancelledCount}
+            />
+          </Card>
+        </Col>
+
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="Leave Days"
+              value={totalLeaveDays}
+            />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card>
+            <Statistic
+              title="Total"
+              value={totalRequests}
+            />
+          </Card>
+        </Col>
+      </Row>
+      
+      <Card
+        title={
+          <Space>
+            Top Employees With Most Leave Days
+
+            <Select
+              value={topLimit}
+              onChange={setTopLimit}
+              style={{
+                width: 100
+              }}
+            >
+              <Option value={1}>
+                Top 1
+              </Option>
+
+              <Option value={5}>
+                Top 5
+              </Option>
+
+              <Option value={10}>
+                Top 10
+              </Option>
+
+              <Option value={20}>
+                Top 20
+              </Option>
+            </Select>
+          </Space>
+        }
+        style={{
+          marginBottom: 20
+        }}
+      >
+        {topEmployees.map(
+          (item, index) => (
+
+            <div
+              key={item.code}
+              style={{
+                marginBottom: 8
+              }}
+            >
+              <strong>
+                #{index + 1}
+              </strong>
+
+              {" "}
+              {item.name}
+
+              {" - "}
+
+              {item.days} days
+            </div>
+          )
+        )}
+      </Card>
       {/* FILTER */}
 
       <Space
         style={{
-          marginBottom: 16
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between"
         }}
         wrap
       >
 
-        <Select
-          value={statusFilter}
-          onChange={
-            setStatusFilter
-          }
+        <div
           style={{
-            width: 180
+            display: "flex",
+            gap: "10px",
+            alignItems: "center"
           }}
         >
-          <Option value="ALL">
-            All Status
-          </Option>
+          <Select
+            value={statusFilter}
+            onChange={
+              setStatusFilter
+            }
+            style={{
+              width: 180
+            }}
+          >
+            <Option value="ALL">
+              All Status
+            </Option>
 
-          <Option value="APPROVED">
-            Approved
-          </Option>
+            <Option value="APPROVED">
+              Approved
+            </Option>
 
-          <Option value="REJECTED">
-            Rejected
-          </Option>
+            <Option value="REJECTED">
+              Rejected
+            </Option>
 
-          <Option value="CANCELLED">
-            Cancelled
-          </Option>
+            <Option value="CANCELLED">
+              Cancelled
+            </Option>
 
-        </Select>
+          </Select>
 
-        <Select
-          value={typeFilter}
-          onChange={
-            setTypeFilter
-          }
+          <Select
+            value={typeFilter}
+            onChange={
+              setTypeFilter
+            }
+            style={{
+              width: 180
+            }}
+          >
+            <Option value="ALL">
+              All Leave Types
+            </Option>
+
+            <Option value="ANNUAL">
+              Annual Leave
+            </Option>
+
+            <Option value="SICK">
+              Sick Leave
+            </Option>
+
+            <Option value="MARRIAGE">
+              Marriage Leave
+            </Option>
+
+            <Option value="CHILD_MARRIAGE">
+              Child Marriage Leave
+            </Option>
+
+            <Option value="FUNERAL">
+              Funeral Leave
+            </Option>
+
+            <Option value="MILITARY_EXAM">
+              Military Exam Leave
+            </Option>
+
+            <Option value="WORK_ACCIDENT">
+              Work Accident Leave
+            </Option>
+
+            <Option value="FOREIGN_VISIT">
+              Foreign Visit Leave
+            </Option>
+
+            <Option value="MATERNITY">
+              Maternity Leave
+            </Option>
+
+            <Option value="PERSONAL">
+              Personal Leave
+            </Option>
+
+          </Select>
+
+          <Input
+            placeholder="Search employee..."
+            value={searchText}
+            onChange={(e) =>
+              setSearchText(
+                e.target.value
+              )
+            }
+            style={{
+              width: 250
+            }}
+          />
+        </div>
+
+        <div
           style={{
-            width: 180
+            display: "flex",
+            gap: "10px",
+            alignItems: "center"
           }}
         >
-          <Option value="ALL">
-            All Leave Types
-          </Option>
-
-          <Option value="ANNUAL">
-            Annual Leave
-          </Option>
-
-          <Option value="SICK">
-            Sick Leave
-          </Option>
-
-          <Option value="MARRIAGE">
-            Marriage Leave
-          </Option>
-
-          <Option value="CHILD_MARRIAGE">
-            Child Marriage Leave
-          </Option>
-
-          <Option value="FUNERAL">
-            Funeral Leave
-          </Option>
-
-          <Option value="MILITARY_EXAM">
-            Military Exam Leave
-          </Option>
-
-          <Option value="WORK_ACCIDENT">
-            Work Accident Leave
-          </Option>
-
-          <Option value="FOREIGN_VISIT">
-            Foreign Visit Leave
-          </Option>
-
-          <Option value="MATERNITY">
-            Maternity Leave
-          </Option>
-
-          <Option value="PERSONAL">
-            Personal Leave
-          </Option>
-
-        </Select>
-
-        <Input
-          placeholder="Search employee..."
-          value={searchText}
-          onChange={(e) =>
-            setSearchText(
-              e.target.value
-            )
-          }
-          style={{
-            width: 250
-          }}
-        />
+          <DatePicker.RangePicker
+            value={dateRange}
+            onChange={(dates) =>
+              setDateRange(dates)
+            }
+          />
+          
+          <Button
+            type="primary"
+            onClick={exportExcel}
+            style={{
+              marginLeft: "auto"
+            }}
+          >
+            Export Excel
+          </Button>
+        </div>
 
       </Space>
 
       {/* TABLE */}
 
       <Table
-
         rowKey="_id"
-
         columns={columns}
-
-        dataSource={
-          filteredData
-        }
-
+        dataSource={filteredData}
         pagination={{
           pageSize: 10
         }}
-
-        tableLayout="fixed"
-
         scroll={{
-          x: 1500,
+          x: "max-content",
           y: 650
         }}
+        tableLayout="auto"
       />
 
+      <Modal
+  open={detailOpen}
+  footer={null}
+  onCancel={() =>
+    setDetailOpen(false)
+  }
+  title="Leave Detail"
+>
+
+  {selectedRecord && (
+
+    <Descriptions
+      bordered
+      column={1}
+    >
+
+      <Descriptions.Item
+        label="Employee"
+      >
+        {
+          selectedRecord.employeeName
+        }
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label="Code"
+      >
+        {
+          selectedRecord.employeeCode
+        }
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label="Leave Type"
+      >
+        {
+          selectedRecord.leaveType
+        }
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label="Status"
+      >
+        {
+          selectedRecord.status
+        }
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label="Days"
+      >
+        {
+          selectedRecord.totalDays
+        }
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label="Reason"
+      >
+        {
+          selectedRecord.reason
+        }
+      </Descriptions.Item>
+
+      <Descriptions.Item
+        label="Created At"
+      >
+        {new Date(
+          selectedRecord.createdAt
+        ).toLocaleString()}
+      </Descriptions.Item>
+
+    </Descriptions>
+  )}
+
+      </Modal>
     </div>
     </Spin>
+
   );
 }
 

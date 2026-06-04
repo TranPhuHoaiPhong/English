@@ -265,11 +265,11 @@ function LeaveHistoryManagerPage() {
 
       `${new Date(
         r.startDate
-      ).toLocaleDateString()}
+      ).toLocaleDateString("vi-VN")}
        →
        ${new Date(
         r.endDate
-      ).toLocaleDateString()}`
+      ).toLocaleDateString("vi-VN")}`
   },
 
   {
@@ -331,17 +331,7 @@ function LeaveHistoryManagerPage() {
     title: "Created At",
     width: 180,
     render: (_, r) =>
-      new Date(r.createdAt).toLocaleString(
-        "en-US",
-        {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false
-        }
-      )
+      new Date(r.createdAt).toLocaleDateString("vi-VN")
   }
 ];
 

@@ -232,6 +232,50 @@ export const requestColumns = (fetchDataUser) => [
         };
       }
 
+      if (record.status === "PENDING") {
+
+        return (
+          <Popconfirm
+            title="Cancel Leave Request"
+            description="Are you sure you want to cancel this request?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={async () => {
+
+              const result =
+                await cancelRequest(
+                  record._id
+                );
+
+              if (
+                result.status ===
+                "SUCCESS"
+              ) {
+
+                message.success(
+                  result.message
+                );
+
+                fetchDataUser();
+
+              } else {
+
+                message.error(
+                  result.message
+                );
+              }
+            }}
+          >
+            <Button
+              danger
+              size="small"
+            >
+              Cancel
+            </Button>
+          </Popconfirm>
+        );
+      }
+
       return doneBy?.name ? (
         <Tag color="green">
           {doneBy.name}
@@ -240,52 +284,6 @@ export const requestColumns = (fetchDataUser) => [
         <Tag color="orange">
           Pending
         </Tag>
-      );
-    },
-  },
-  {
-    title: "Cancel",
-    key: "cancel",
-
-    render: (_, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: { colSpan: 0 },
-        };
-      }
-
-      if (record.status !== "PENDING") {
-        return "-";
-      }
-
-      return (
-        <Popconfirm
-          title="Cancel Leave Request"
-          description="Are you sure you want to cancel this request?"
-          okText="Yes"
-          cancelText="No"
-          onConfirm={async () => {
-
-            const result =
-              await cancelRequest(record._id);
-
-            if (result.status === "SUCCESS") {
-
-              message.success(result.message);
-
-              // 👇 gọi lại từ parent
-              fetchDataUser();
-
-            } else {
-              message.error(result.message);
-            }
-          }}
-        >
-          <Button danger size="small">
-            Cancel
-          </Button>
-        </Popconfirm>
       );
     },
   }
