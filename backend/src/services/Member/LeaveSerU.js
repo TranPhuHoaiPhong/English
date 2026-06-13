@@ -484,9 +484,7 @@ const createLeaveRequestService = async (data) => {
 
 const cancelLeaveRequestService = async (id) => {
   try {
-
-    const leaveRequest =
-      await LeaveRequest.findById(id);
+    const leaveRequest = await LeaveRequest.findById(id);
 
     if (!leaveRequest) {
       return {
@@ -495,7 +493,6 @@ const cancelLeaveRequestService = async (id) => {
       };
     }
 
-    // chỉ cho hủy đơn pending
     if (leaveRequest.status !== "PENDING") {
       return {
         status: "ERROR",
@@ -503,42 +500,52 @@ const cancelLeaveRequestService = async (id) => {
       };
     }
 
-    // kiểm tra 24 giờ
-    const createdAt =
-      new Date(leaveRequest.createdAt);
-
+    const createdAt = new Date(leaveRequest.createdAt);
     const now = new Date();
 
-    const diffHours =
-      (now - createdAt) /
-      (1000 * 60 * 60);
+    const diffHours = (now - createdAt) / (1000 * 60 * 60);
 
     if (diffHours > 24) {
       return {
         status: "ERROR",
-        message:
-          "Cancellation period exceeded 24 hours"
+        message: "Cancellation period exceeded 24 hours"
       };
     }
 
-    leaveRequest.status =
-      "CANCELLED";
+    const employee = await Employee.findById(leaveRequest.employeeId);
 
+    if (!employee) {
+      return {
+        status: "ERROR",
+        message: "Employee not found"
+      };
+    }
+
+    // hoàn lại ngày phép
+    if (leaveRequest.leaveType === "ANNUAL") {
+      await Employee.updateOne(
+        { _id: leaveRequest.employeeId },
+        {
+          $inc: {
+            leaveBalance: Number(leaveRequest.totalDays || 0)
+          }
+        }
+      );
+    }
+
+    leaveRequest.status = "CANCELLED";
     await leaveRequest.save();
 
     return {
       status: "SUCCESS",
-      message:
-        "Leave request cancelled successfully"
+      message: "Leave request cancelled successfully"
     };
 
   } catch (error) {
-
     return {
       status: "ERROR",
       message: error.message
     };
-
   }
 };
 

@@ -113,42 +113,6 @@ function HomePage() {
       }
     };
 
-  const groupedData = [];
-
-  let currentGroup = "";
-
-  [...dataRequest]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt) -
-        new Date(a.createdAt)
-    )
-    .forEach((item) => {
-
-      const date = new Date(
-        item.createdAt
-      );
-
-      const monthYear =
-        `${date.toLocaleString("en-US", {
-          month: "long",
-        })} ${date.getFullYear()}`;
-
-      // nếu khác tháng/năm
-      if (monthYear !== currentGroup) {
-
-        currentGroup = monthYear;
-
-        groupedData.push({
-          _id: `group-${monthYear}`,
-          isGroup: true,
-          title: monthYear,
-        });
-      }
-
-      groupedData.push(item);
-    });
-
   return (
     <>
       <Spin spinning={loading} size="large">
@@ -193,7 +157,7 @@ function HomePage() {
               />
               <Progress
                 percent={
-                  ((13 - (dataUser?.leaveBalance || 0)) / 13) * 100
+                  ((12 - (dataUser?.leaveBalance || 0)) / 12) * 100
                 }
                 showInfo={false}
                 strokeColor={
@@ -204,8 +168,8 @@ function HomePage() {
               />
               <div style={{ marginTop: 8 }}>
                 Total used: {
-                  13 - (dataUser?.leaveBalance || 0)
-                } / 13 days
+                  12 - (dataUser?.leaveBalance || 0)
+                } / 12 days
               </div>
             </Card>
           </Col>
@@ -276,7 +240,7 @@ function HomePage() {
           <Table
             rowKey="_id"
             columns={requestColumns(fetchDataUser)}
-            dataSource={groupedData}
+            dataSource={dataRequest}
             pagination={false}
           />
         </Card>

@@ -28,6 +28,7 @@ function EmployeePage() {
   const [loading, setLoading] = useState(true);
 
   const [statusFilter, setStatusFilter] = useState("ACTIVE");
+  const [departmentFilter, setDepartmentFilter] = useState("ALL");
 
   useEffect(() => {
 
@@ -76,32 +77,44 @@ function EmployeePage() {
     employee: 3
   };
   
-  const filteredData = data.filter((e) => {
-    const roleMatch =
-      roleFilter === "ALL" ||
-      e.role === roleFilter;
+  const filteredData = data
+    .filter((e) => {
+      const roleMatch =
+        roleFilter === "ALL" ||
+        e.role === roleFilter;
 
-    const statusMatch =
-      statusFilter === "ALL" ||
-      e.status === statusFilter;
+      const statusMatch =
+        statusFilter === "ALL" ||
+        e.status === statusFilter;
 
-    const searchMatch =
-      e.name
-        .toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      e.email
-        .toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      e.code
-        .toLowerCase()
-        .includes(searchText.toLowerCase());
+      const departmentMatch =
+        departmentFilter === "ALL" ||
+        e.department?._id === departmentFilter;
 
-    return (
-      roleMatch &&
-      statusMatch &&
-      searchMatch
+      const searchMatch =
+        e.name
+          .toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        e.email
+          .toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        e.code
+          .toLowerCase()
+          .includes(searchText.toLowerCase());
+
+      return (
+        roleMatch &&
+        statusMatch &&
+        departmentMatch &&
+        searchMatch
+      );
+    })
+    .sort((a, b) =>
+      (a.department?.name || "").localeCompare(
+        b.department?.name || "",
+        "vi"
+      )
     );
-  });
 
   const openModal = (record = null) => {
     setEditingEmployee(record);
@@ -186,6 +199,9 @@ function EmployeePage() {
             setRoleFilter={setRoleFilter}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            departmentFilter={departmentFilter}
+            setDepartmentFilter={setDepartmentFilter}
+            departments={departments}
             searchText={searchText}
             setSearchText={setSearchText}
             openModal={openModal}

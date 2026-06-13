@@ -60,6 +60,7 @@ const approveLeaveRequest = async (req, res) => {
 
 const rejectLeaveRequest = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { rejectReason } = req.body;
     const result = await LeaveService.rejectLeaveRequestService(
         req.params.id,

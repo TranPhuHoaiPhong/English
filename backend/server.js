@@ -7,7 +7,10 @@ const connectDB = require("./src/config/db");
 const routes = require("./src/routes/index");
 const path = require("path");
 
-require("./src/itls/resetLeaveBalance");
+// require("./src/itls/resetLeaveBalance");
+// import cron
+require("./src/util/monthlyLeaveCron");
+require("./src/util/yearlyResetCron");
 
 const app = express();
 

@@ -16,32 +16,7 @@ export const requestColumns = (fetchDataUser) => [
     title: "Employee",
     dataIndex: "employeeName",
     key: "employeeName",
-
-    render: (_, record) => {
-
-      // row tháng
-      if (record.isGroup) {
-        return {
-          children: (
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: 18,
-                padding: "6px 0",
-              }}
-            >
-              {record.title}
-            </div>
-          ),
-
-          props: {
-            colSpan: 7,
-          },
-        };
-      }
-
-      return record.employeeName;
-    },
+    render: (text) => text,
   },
 
   {
@@ -49,59 +24,29 @@ export const requestColumns = (fetchDataUser) => [
     dataIndex: "leaveType",
     key: "leaveType",
 
-    render: (value, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
-
-      return value;
-    },
+    render: (text) => text,
   },
 
   {
     title: "Start Date",
     dataIndex: "startDate",
     key: "startDate",
-
-    render: (date, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
-
-      return new Date(
-        date
-      ).toLocaleDateString();
+    render: (date) => {
+      if (!date) return "-";
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString();
     },
   },
-
   {
     title: "End Date",
     dataIndex: "endDate",
     key: "endDate",
-
-    render: (date, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
-
-      return new Date(
-        date
-      ).toLocaleDateString();
+    render: (date) => {
+      if (!date) return "-";
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString();
     },
   },
 
@@ -111,14 +56,6 @@ export const requestColumns = (fetchDataUser) => [
     key: "totalDays",
 
     render: (value, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
 
       return value;
     },
@@ -130,14 +67,6 @@ export const requestColumns = (fetchDataUser) => [
     width: 130,
 
     render: (_, r) => {
-
-      if (r.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
 
       if (r.leaveType !== "SICK") {
         return "-";
@@ -184,14 +113,6 @@ export const requestColumns = (fetchDataUser) => [
 
     render: (status, record) => {
 
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
-
       let color = "default";
 
       if (status === "PENDING") {
@@ -218,19 +139,22 @@ export const requestColumns = (fetchDataUser) => [
     },
   },
   {
+    title: "Created At",
+
+    width: 180,
+
+    render: (_, r) =>
+
+      new Date(
+        r.createdAt
+      ).toLocaleDateString("en-US")
+  },
+  {
     title: "Done By",
     dataIndex: "doneBy",
     key: "doneBy",
 
     render: (doneBy, record) => {
-
-      if (record.isGroup) {
-        return {
-          props: {
-            colSpan: 0,
-          },
-        };
-      }
 
       if (record.status === "PENDING") {
 

@@ -214,7 +214,7 @@ function LeaveTable({
     {
       title: "Action",
 
-      width: 320,
+      width: 120,
 
       fixed: "right",
 
@@ -222,7 +222,7 @@ function LeaveTable({
 
         <Space>
 
-          <Popconfirm
+          {/* <Popconfirm
             title="Approve leave request?"
             okText="Approve"
             cancelText="Cancel"
@@ -238,16 +238,16 @@ function LeaveTable({
           </Popconfirm>
 
           <Button
-  danger
-  onClick={() => {
+            danger
+            onClick={() => {
 
-    setSelectedId(r._id);
+              setSelectedId(r._id);
 
-    setRejectOpen(true);
-  }}
->
-  Reject
-</Button>
+              setRejectOpen(true);
+            }}
+          >
+            Reject
+          </Button> */}
 
           <Button
             onClick={() =>

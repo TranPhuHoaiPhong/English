@@ -7,6 +7,9 @@ function EmployeeFilter({
   setRoleFilter,
   statusFilter,
   setStatusFilter,
+  departmentFilter,
+  setDepartmentFilter,
+  departments,
   searchText,
   setSearchText,
   openModal
@@ -39,6 +42,25 @@ function EmployeeFilter({
           <Option value="ACTIVE">Active</Option>
           <Option value="INACTIVE">Inactive</Option>
           <Option value="ALL">All</Option>
+        </Select>
+
+        <Select
+          value={departmentFilter}
+          onChange={setDepartmentFilter}
+          style={{ width: 180, marginRight: 10 }}
+        >
+          <Option value="ALL">
+            All Departments
+          </Option>
+
+          {departments.map((department) => (
+            <Option
+              key={department._id}
+              value={department._id}
+            >
+              {department.name}
+            </Option>
+          ))}
         </Select>
 
         <Input

@@ -22,6 +22,7 @@ import dayjs from "dayjs";
 import * as XLSX from "xlsx";
 import { useEffect, useState } from "react";
 import { getHistoryLeaveRequest } from "../../services/Admin/HistoryRequest/HistoryRequest";
+import LeaveReportModal from "../../components/Admin/LeaveRequest/LeaveReportModal";
 
 const { Option } = Select;
 
@@ -30,10 +31,12 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 function LeaveHistoryPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [topLimit, setTopLimit] = useState(5);
+
+  const [reportOpen, setReportOpen] = useState(false);
+
 
   const [
     statusFilter,
@@ -74,39 +77,6 @@ function LeaveHistoryPage() {
         sum + item.totalDays,
       0
     );
-
-  const topEmployees = Object.values(
-    data.reduce(
-      (acc, item) => {
-
-        if (
-          !acc[item.employeeCode]
-        ) {
-
-          acc[item.employeeCode] = {
-            code:
-              item.employeeCode,
-
-            name:
-              item.employeeName,
-
-            days: 0
-          };
-        }
-
-        acc[item.employeeCode].days +=
-          item.totalDays;
-
-        return acc;
-      },
-      {}
-    )
-  )
-    .sort(
-      (a, b) =>
-        b.days - a.days
-    )
-    .slice(0, topLimit);
     
 
   const fetchLeaveRequests = async () => {
@@ -163,63 +133,55 @@ function LeaveHistoryPage() {
 
   // ===== filter =====
 
-const filteredData = [...data]
-  .sort((a, b) => 
-    new Date(b.createdAt) - new Date(a.createdAt)
-  )
-  .filter((item) => {
+  const filteredData = [...data]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt) -
+        new Date(a.createdAt)
+    )
+    .filter((item) => {
+      const matchType =
+        typeFilter === "ALL" ||
+        item.leaveType === typeFilter;
 
-    const matchType =
-      typeFilter === "ALL" ||
-      item.leaveType === typeFilter;
+      const matchStatus =
+        statusFilter === "ALL" ||
+        item.status === statusFilter;
 
-    const matchStatus =
-      statusFilter === "ALL" ||
-      item.status === statusFilter;
+      const keyword =
+        removeVietnameseTones(
+          searchText.toLowerCase()
+        );
 
-    const keyword = removeVietnameseTones(
-      searchText.toLowerCase()
-    );
+      const matchSearch =
+        removeVietnameseTones(
+          (item.employeeName || "")
+            .toLowerCase()
+        ).includes(keyword) ||
+        removeVietnameseTones(
+          (item.employeeCode || "")
+            .toLowerCase()
+        ).includes(keyword);
 
-    const matchSearch =
-      removeVietnameseTones(
-        (item.employeeName || "").toLowerCase()
-      ).includes(keyword) ||
-      removeVietnameseTones(
-        (item.employeeCode || "").toLowerCase()
-      ).includes(keyword);
-    
-    let matchDate = true;
+      let matchDate = true;
 
-    if (
-      dateRange &&
-      dateRange.length === 2
-    ) {
+      if (selectedDate) {
+        matchDate =
+          dayjs(item.createdAt).format(
+            "YYYY-MM-DD"
+          ) ===
+          selectedDate.format(
+            "YYYY-MM-DD"
+          );
+      }
 
-      const leaveDate =
-        dayjs(item.startDate)
-          .format("YYYY-MM-DD");
-
-      const start =
-        dateRange[0]
-          .format("YYYY-MM-DD");
-
-      const end =
-        dateRange[1]
-          .format("YYYY-MM-DD");
-
-      matchDate =
-        leaveDate >= start &&
-        leaveDate <= end;
-    }
-
-    return (
-      matchType &&
-      matchStatus &&
-      matchSearch &&
-      matchDate
-    );
-  });
+      return (
+        matchType &&
+        matchStatus &&
+        matchSearch &&
+        matchDate
+      );
+    });
 
   const exportExcel = () => {
 
@@ -325,47 +287,47 @@ const filteredData = [...data]
 
   // ===== medical proof =====
 
-  const renderMedicalProof = (r) => {
+  // const renderMedicalProof = (r) => {
 
-      if (
-        r.leaveType !==
-        "SICK"
-      ) {
+  //     if (
+  //       r.leaveType !==
+  //       "SICK"
+  //     ) {
 
-        return "-";
-      }
+  //       return "-";
+  //     }
 
-      if (
-        !r.medicalProof
-      ) {
+  //     if (
+  //       !r.medicalProof
+  //     ) {
 
-        return (
-          <Tag color="red">
-            Missing
-          </Tag>
-        );
-      }
+  //       return (
+  //         <Tag color="red">
+  //           Missing
+  //         </Tag>
+  //       );
+  //     }
 
-      return (
+  //     return (
 
-        <Popover
-          content={
+  //       <Popover
+  //         content={
 
-            <Image
-              src={
-                `${API_URL}/uploads/${r.medicalProof?.fileName}`
-              }
-              width={220}
-            />
-          }
-        >
-          <Tag color="green">
-            View
-          </Tag>
+  //           <Image
+  //             src={
+  //               `${API_URL}/uploads/${r.medicalProof?.fileName}`
+  //             }
+  //             width={220}
+  //           />
+  //         }
+  //       >
+  //         <Tag color="green">
+  //           View
+  //         </Tag>
 
-        </Popover>
-      );
-    };
+  //       </Popover>
+  //     );
+  //   };
 
   // ===== columns =====
 
@@ -434,26 +396,26 @@ const filteredData = [...data]
 
   // ===== only show when filter is SICK or ALL =====
 
-  ...(typeFilter === "SICK" ||
-  typeFilter === "ALL"
+  // ...(typeFilter === "SICK" ||
+  // typeFilter === "ALL"
 
-    ? [
+  //   ? [
 
-        {
-          title:
-            "Medical Proof",
+  //       {
+  //         title:
+  //           "Medical Proof",
 
-          width: 180,
+  //         width: 180,
 
-          render: (_, r) =>
-            renderMedicalProof(
-              r
-            )
-        }
+  //         render: (_, r) =>
+  //           renderMedicalProof(
+  //             r
+  //           )
+  //       }
 
-      ]
+  //     ]
 
-    : []),
+  //   : []),
 
   {
     title: "Status",
@@ -582,64 +544,11 @@ const filteredData = [...data]
         </Col>
       </Row>
       
-      <Card
-        title={
-          <Space>
-            Top Employees With Most Leave Days
-
-            <Select
-              value={topLimit}
-              onChange={setTopLimit}
-              style={{
-                width: 100
-              }}
-            >
-              <Option value={1}>
-                Top 1
-              </Option>
-
-              <Option value={5}>
-                Top 5
-              </Option>
-
-              <Option value={10}>
-                Top 10
-              </Option>
-
-              <Option value={20}>
-                Top 20
-              </Option>
-            </Select>
-          </Space>
-        }
-        style={{
-          marginBottom: 20
-        }}
-      >
-        {topEmployees.map(
-          (item, index) => (
-
-            <div
-              key={item.code}
-              style={{
-                marginBottom: 8
-              }}
-            >
-              <strong>
-                #{index + 1}
-              </strong>
-
-              {" "}
-              {item.name}
-
-              {" - "}
-
-              {item.days} days
-            </div>
-          )
-        )}
-      </Card>
-      {/* FILTER */}
+      <Space>
+        <div>
+          
+        </div>
+      </Space>
 
       <Space
         style={{
@@ -760,11 +669,9 @@ const filteredData = [...data]
             alignItems: "center"
           }}
         >
-          <DatePicker.RangePicker
-            value={dateRange}
-            onChange={(dates) =>
-              setDateRange(dates)
-            }
+          <DatePicker
+            value={selectedDate}
+            onChange={setSelectedDate}
           />
           
           <Button
@@ -776,6 +683,23 @@ const filteredData = [...data]
           >
             Export Excel
           </Button>
+
+          <Button
+            type="primary"
+            onClick={() =>
+              setReportOpen(true)
+            }
+          >
+            Leave Report
+          </Button>
+
+          <LeaveReportModal
+            open={reportOpen}
+            onClose={() =>
+              setReportOpen(false)
+            }
+            leaveRequests={data}
+          />
         </div>
 
       </Space>
@@ -797,79 +721,79 @@ const filteredData = [...data]
       />
 
       <Modal
-  open={detailOpen}
-  footer={null}
-  onCancel={() =>
-    setDetailOpen(false)
-  }
-  title="Leave Detail"
->
-
-  {selectedRecord && (
-
-    <Descriptions
-      bordered
-      column={1}
-    >
-
-      <Descriptions.Item
-        label="Employee"
-      >
-        {
-          selectedRecord.employeeName
+        open={detailOpen}
+        footer={null}
+        onCancel={() =>
+          setDetailOpen(false)
         }
-      </Descriptions.Item>
-
-      <Descriptions.Item
-        label="Code"
+        title="Leave Detail"
       >
-        {
-          selectedRecord.employeeCode
-        }
-      </Descriptions.Item>
 
-      <Descriptions.Item
-        label="Leave Type"
-      >
-        {
-          selectedRecord.leaveType
-        }
-      </Descriptions.Item>
+        {selectedRecord && (
 
-      <Descriptions.Item
-        label="Status"
-      >
-        {
-          selectedRecord.status
-        }
-      </Descriptions.Item>
+          <Descriptions
+            bordered
+            column={1}
+          >
 
-      <Descriptions.Item
-        label="Days"
-      >
-        {
-          selectedRecord.totalDays
-        }
-      </Descriptions.Item>
+            <Descriptions.Item
+              label="Employee"
+            >
+              {
+                selectedRecord.employeeName
+              }
+            </Descriptions.Item>
 
-      <Descriptions.Item
-        label="Reason"
-      >
-        {
-          selectedRecord.reason
-        }
-      </Descriptions.Item>
+            <Descriptions.Item
+              label="Code"
+            >
+              {
+                selectedRecord.employeeCode
+              }
+            </Descriptions.Item>
 
-      <Descriptions.Item
-        label="Created At"
-      >
-        {new Date(
-          selectedRecord.createdAt
-        ).toLocaleString()}
-      </Descriptions.Item>
+            <Descriptions.Item
+              label="Leave Type"
+            >
+              {
+                selectedRecord.leaveType
+              }
+            </Descriptions.Item>
 
-    </Descriptions>
-  )}
+            <Descriptions.Item
+              label="Status"
+            >
+              {
+                selectedRecord.status
+              }
+            </Descriptions.Item>
+
+            <Descriptions.Item
+              label="Days"
+            >
+              {
+                selectedRecord.totalDays
+              }
+            </Descriptions.Item>
+
+            <Descriptions.Item
+              label="Reason"
+            >
+              {
+                selectedRecord.reason
+              }
+            </Descriptions.Item>
+
+            <Descriptions.Item
+              label="Created At"
+            >
+              {new Date(
+                selectedRecord.createdAt
+              ).toLocaleString()}
+            </Descriptions.Item>
+
+          </Descriptions>
+        )}
 
       </Modal>
     </div>

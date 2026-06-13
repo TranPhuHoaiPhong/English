@@ -6,7 +6,16 @@ const {
 } = require("../JwtService/JwtService");
 
 const createEmployeeService = async (data) => {
-  const { name, email, department, password, role, phone } = data;
+  const {
+    name,
+    email,
+    department,
+    password,
+    role,
+    phone,
+    hireDate,
+    isHazardousWork
+  } = data;
 
   if (!name || !email || !phone) {
     return {
@@ -55,7 +64,9 @@ const createEmployeeService = async (data) => {
     department,
     phone,
     password: hash,
-    role: role || "employee"
+    role: role || "employee",
+    hireDate,
+    isHazardousWork
   });
 
   return {
